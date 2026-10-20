@@ -2,22 +2,20 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import TopBar from '@/components/TopBar';
+import CommandPalette from '@/components/CommandPalette';
 import { WholesaleAccount, WholesaleStage, StudioAccountType } from '@/lib/types';
 import {
   Building2,
-  Store,
-  DollarSign,
-  Calendar,
-  X,
-  Plus,
-  Save,
-  Trash2,
-  Phone,
-  Mail,
   MapPin,
+  Trash2,
+  Save,
+  X,
   TrendingUp,
   Package,
+  Calendar,
+  CheckCircle2,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 const STAGES: { key: WholesaleStage; label: string; dotColor: string }[] = [
   { key: 'lead_pitch', label: 'Lead / Pitch', dotColor: 'bg-zinc-400' },
@@ -28,11 +26,13 @@ const STAGES: { key: WholesaleStage; label: string; dotColor: string }[] = [
 ];
 
 export default function WholesalePage() {
+  const { showToast } = useToast();
   const [accounts, setAccounts] = useState<WholesaleAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAccount, setSelectedAccount] = useState<WholesaleAccount | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   const fetchAccounts = async () => {
     try {
@@ -74,6 +74,7 @@ export default function WholesalePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, stage: newStage }),
       });
+      showToast(`Updated studio pipeline stage`);
     } catch (err) {
       console.error('Failed to update stage:', err);
       fetchAccounts();
@@ -93,6 +94,7 @@ export default function WholesalePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated),
       });
+      showToast(`Saved ${updated.business_name}`);
     } catch (err) {
       console.error('Failed to save account:', err);
       fetchAccounts();
@@ -105,6 +107,7 @@ export default function WholesalePage() {
 
     try {
       await fetch(`/api/wholesale?id=${id}`, { method: 'DELETE' });
+      showToast(`Deleted wholesale account`, 'info');
     } catch (err) {
       console.error('Failed to delete account:', err);
       fetchAccounts();
@@ -123,15 +126,17 @@ export default function WholesalePage() {
         onSearchChange={setSearchTerm}
         onNewClick={() => setIsNewModalOpen(true)}
         newButtonLabel="+ Add Studio"
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
       {loading ? (
-        <div className="flex-1 flex items-center justify-center text-xs text-[#71717a]">
-          Loading wholesale pipeline...
+        <div className="flex-1 flex flex-col items-center justify-center text-xs text-[#71717a] gap-2">
+          <div className="w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+          <span>Loading wholesale pipeline...</span>
         </div>
       ) : (
         <div className="flex-1 overflow-x-auto p-6">
-          <div className="flex gap-4 min-w-[1200px] h-full items-start">
+          <div className="flex gap-4 min-w-[1240px] h-full items-start">
             {STAGES.map((col) => {
               const colAccounts = filteredAccounts.filter((a) => a.stage === col.key);
               const colValue = colAccounts.reduce((acc, a) => acc + Number(a.estimated_order_value || 0), 0);
@@ -139,49 +144,49 @@ export default function WholesalePage() {
               return (
                 <div
                   key={col.key}
-                  className="w-72 shrink-0 flex flex-col rounded-lg bg-[#f4f4f5]/60 border border-[#e4e4e7]"
+                  className="w-72 shrink-0 flex flex-col rounded-xl bg-[#f4f4f5]/70 border border-[#e4e4e7]"
                 >
                   {/* Column Header */}
-                  <div className="p-3 border-b border-[#e4e4e7] flex items-center justify-between">
+                  <div className="p-3 border-b border-[#e4e4e7] flex items-center justify-between bg-white/60 rounded-t-xl">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
-                      <span className="text-xs font-semibold text-[#09090b]">{col.label}</span>
+                      <span className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} />
+                      <span className="text-xs font-bold text-[#09090b]">{col.label}</span>
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] font-mono font-bold text-zinc-800">
+                      <div className="text-[11px] font-mono font-bold text-zinc-900">
                         ₹{colValue.toLocaleString('en-IN')}
                       </div>
-                      <div className="text-[9px] text-zinc-500">{colAccounts.length} accounts</div>
+                      <div className="text-[9px] text-zinc-500 font-medium">{colAccounts.length} accounts</div>
                     </div>
                   </div>
 
                   {/* Cards */}
-                  <div className="p-2 space-y-2.5 min-h-[480px] max-h-[calc(100vh-170px)] overflow-y-auto">
+                  <div className="p-2 space-y-2.5 min-h-[480px] max-h-[calc(100vh-175px)] overflow-y-auto">
                     {colAccounts.map((account) => (
                       <div
                         key={account.id}
                         onClick={() => setSelectedAccount(account)}
-                        className="p-3.5 rounded-md bg-white border border-[#e4e4e7] shadow-card hover:border-[#a1a1aa] hover:shadow-md cursor-pointer transition-all group"
+                        className="p-3.5 rounded-lg bg-white border border-[#e4e4e7] shadow-card hover:border-zinc-400 hover:shadow-md cursor-pointer transition-all group select-none"
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold text-[#09090b] group-hover:text-blue-600 transition-colors">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs font-bold text-[#09090b] group-hover:text-blue-600 transition-colors truncate">
                             {account.business_name}
                           </span>
-                          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200 shrink-0">
                             {account.account_type.split(' ')[0]}
                           </span>
                         </div>
 
-                        <div className="text-[11px] text-[#71717a] flex items-center gap-1 mb-2">
-                          <MapPin className="w-3 h-3 text-zinc-400" />
-                          <span>{account.location}</span>
+                        <div className="text-[11px] text-[#71717a] flex items-center gap-1 mb-2.5">
+                          <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
+                          <span className="truncate">{account.location}</span>
                         </div>
 
                         <div className="pt-2 border-t border-[#f4f4f5] flex items-center justify-between">
-                          <div className="text-[11px] text-zinc-600">
-                            Buyer: <strong className="font-medium text-zinc-900">{account.contact_name}</strong>
+                          <div className="text-[11px] text-zinc-600 truncate">
+                            Buyer: <strong className="font-semibold text-zinc-900">{account.contact_name}</strong>
                           </div>
-                          <div className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <div className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
                             ₹{Number(account.estimated_order_value).toLocaleString('en-IN')}
                           </div>
                         </div>
@@ -189,8 +194,8 @@ export default function WholesalePage() {
                     ))}
 
                     {colAccounts.length === 0 && (
-                      <div className="h-28 border border-dashed border-[#e4e4e7] rounded flex items-center justify-center text-[11px] text-[#a1a1aa]">
-                        No studio deals
+                      <div className="h-32 border border-dashed border-[#e4e4e7] rounded-lg flex items-center justify-center text-[11px] text-[#a1a1aa]">
+                        No studio accounts in stage
                       </div>
                     )}
                   </div>
@@ -202,20 +207,33 @@ export default function WholesalePage() {
       )}
 
       {/* KPI Ticker */}
-      <div className="h-10 px-6 bg-white border-t border-[#e4e4e7] flex items-center justify-between text-xs text-[#71717a] shrink-0">
+      <div className="h-10 px-6 bg-white border-t border-[#e4e4e7] flex items-center justify-between text-xs text-[#71717a] shrink-0 select-none">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5 text-zinc-600" />
-            <span>Total Studios: <strong className="text-[#09090b] font-semibold">{accounts.length}</strong></span>
+            <span>
+              Total Studios: <strong className="text-[#09090b] font-semibold">{accounts.length}</strong>
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Total Pipeline Value: <strong className="text-emerald-900 font-semibold font-mono">₹{totalPipelineValue.toLocaleString('en-IN')}</strong></span>
+            <span>
+              Total Pipeline Value:{' '}
+              <strong className="text-emerald-900 font-semibold font-mono">
+                ₹{totalPipelineValue.toLocaleString('en-IN')}
+              </strong>
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Package className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Active Partners & POs: <strong className="text-indigo-900 font-semibold">{totalActivePartners}</strong></span>
+            <span>
+              Active Partners & POs:{' '}
+              <strong className="text-indigo-900 font-semibold">{totalActivePartners}</strong>
+            </span>
           </div>
+        </div>
+        <div className="text-[11px] font-mono text-[#a1a1aa]">
+          Press ⌘K for Command Bar
         </div>
       </div>
 
@@ -237,9 +255,16 @@ export default function WholesalePage() {
           onCreated={(newAcc) => {
             setAccounts((prev) => [newAcc, ...prev]);
             setSelectedAccount(newAcc);
+            showToast(`Added ${newAcc.business_name} to wholesale pipeline`);
           }}
         />
       )}
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+      />
     </div>
   );
 }
@@ -262,6 +287,14 @@ function WholesaleDrawer({
     setFormData(account);
   }, [account]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleChange = (field: keyof WholesaleAccount, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -276,22 +309,24 @@ function WholesaleDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/20 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-sm">
       <div className="flex-1" onClick={onClose} />
-      <div className="w-[500px] bg-white h-full shadow-drawer border-l border-[#e4e4e7] flex flex-col animate-slide-in">
-        <div className="h-14 px-6 border-b border-[#e4e4e7] flex items-center justify-between shrink-0 bg-[#fafafa]">
+      <div className="w-[520px] bg-white h-full shadow-drawer border-l border-[#e4e4e7] flex flex-col animate-slide-in">
+        <div className="h-16 px-6 border-b border-[#e4e4e7] flex items-center justify-between shrink-0 bg-[#fafafa]">
           <div>
-            <div className="font-semibold text-sm text-[#09090b]">{formData.business_name}</div>
-            <div className="text-[11px] text-[#71717a]">{formData.account_type} • {formData.location}</div>
+            <div className="font-bold text-sm text-[#09090b]">{formData.business_name}</div>
+            <div className="text-[11px] text-[#71717a] font-medium">
+              {formData.account_type} • {formData.location}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => confirm(`Delete ${account.business_name}?`) && onDelete(account.id)}
-              className="p-1.5 text-zinc-400 hover:text-rose-600 rounded"
+              className="p-1.5 text-zinc-400 hover:text-rose-600 rounded-md transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
-            <button onClick={onClose} className="p-1.5 text-zinc-400 hover:text-zinc-700 rounded">
+            <button onClick={onClose} className="p-1.5 text-zinc-400 hover:text-zinc-700 rounded-md transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -299,111 +334,134 @@ function WholesaleDrawer({
 
         <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
           <div>
-            <label className="block text-[11px] font-semibold text-zinc-600 uppercase mb-1.5">Pipeline Stage</label>
-            <select
-              value={formData.stage || 'lead_pitch'}
-              onChange={(e) => handleChange('stage', e.target.value)}
-              className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-3 py-2 text-xs font-semibold"
-            >
-              <option value="lead_pitch">Lead / Pitch</option>
-              <option value="lookbook_sent">Lookbook Sent</option>
-              <option value="sample_kit_sent">Fit Kit Dispatched</option>
-              <option value="po_received">Purchase Order Placed 📦</option>
-              <option value="active_partner">Active Wholesale Stockist ✨</option>
-            </select>
+            <label className="block text-[11px] font-bold text-zinc-600 uppercase mb-2">
+              Pipeline Stage
+            </label>
+            <div className="grid grid-cols-2 gap-2 bg-[#f4f4f5] p-1.5 rounded-lg border border-[#e4e4e7]">
+              {(['lead_pitch', 'lookbook_sent', 'sample_kit_sent', 'po_received', 'active_partner'] as WholesaleStage[]).map(
+                (st) => {
+                  const isSelected = formData.stage === st;
+                  const labels: Record<WholesaleStage, string> = {
+                    lead_pitch: 'Lead / Pitch',
+                    lookbook_sent: 'Lookbook Sent',
+                    sample_kit_sent: 'Fit Kit Dispatched',
+                    po_received: 'PO Placed 📦',
+                    active_partner: 'Active Stockist ✨',
+                  };
+                  return (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => handleChange('stage', st)}
+                      className={`py-1.5 px-2 text-[11px] font-semibold rounded-md transition-all ${
+                        isSelected ? 'bg-white text-zinc-900 shadow-subtle' : 'text-zinc-600 hover:text-zinc-900'
+                      }`}
+                    >
+                      {labels[st]}
+                    </button>
+                  );
+                }
+              )}
+            </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-3">
-            <span className="block font-semibold text-xs text-zinc-900">Commercial Deal Economics</span>
+          <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-3">
+            <span className="block font-bold text-xs text-zinc-900">Commercial Deal Economics</span>
             <div>
-              <label className="text-[10px] font-semibold text-zinc-500 uppercase">Estimated Order Value (₹)</label>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase">Estimated Order Value (₹)</label>
               <input
                 type="number"
                 value={formData.estimated_order_value || 0}
                 onChange={(e) => handleChange('estimated_order_value', Number(e.target.value))}
-                className="mt-1 w-full bg-white border border-zinc-300 rounded px-3 py-1.5 font-mono font-bold text-sm"
+                className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-3 py-1.5 font-mono font-bold text-sm"
               />
             </div>
             <div>
-              <label className="text-[10px] font-semibold text-zinc-500 uppercase">Target Delivery Date</label>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase">Target Delivery Date</label>
               <input
                 type="date"
                 value={formData.target_delivery_date ? formData.target_delivery_date.slice(0, 10) : ''}
                 onChange={(e) => handleChange('target_delivery_date', e.target.value)}
-                className="mt-1 w-full bg-white border border-zinc-300 rounded px-3 py-1.5 text-xs"
+                className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-3 py-1.5 text-xs font-medium"
               />
             </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-3">
-            <span className="block font-semibold text-xs text-zinc-900">Buyer Contact & Location</span>
+          <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-3">
+            <span className="block font-bold text-xs text-zinc-900">Buyer Contact & Location</span>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-semibold text-zinc-500 uppercase">Buyer Name</label>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">Buyer Name</label>
                 <input
                   type="text"
                   value={formData.contact_name || ''}
                   onChange={(e) => handleChange('contact_name', e.target.value)}
-                  className="mt-1 w-full bg-white border border-zinc-300 rounded px-2.5 py-1.5 text-xs"
+                  className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-2.5 py-1.5 text-xs"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-semibold text-zinc-500 uppercase">Location / City</label>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">Location / City</label>
                 <input
                   type="text"
                   value={formData.location || ''}
                   onChange={(e) => handleChange('location', e.target.value)}
-                  className="mt-1 w-full bg-white border border-zinc-300 rounded px-2.5 py-1.5 text-xs"
+                  className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-2.5 py-1.5 text-xs"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-semibold text-zinc-500 uppercase">Contact Email</label>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">Contact Email</label>
                 <input
                   type="email"
                   value={formData.contact_email || ''}
                   onChange={(e) => handleChange('contact_email', e.target.value)}
-                  className="mt-1 w-full bg-white border border-zinc-300 rounded px-2.5 py-1.5 text-xs"
+                  className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-2.5 py-1.5 text-xs"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-semibold text-zinc-500 uppercase">Contact Phone</label>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">Contact Phone</label>
                 <input
                   type="text"
                   value={formData.contact_phone || ''}
                   onChange={(e) => handleChange('contact_phone', e.target.value)}
-                  className="mt-1 w-full bg-white border border-zinc-300 rounded px-2.5 py-1.5 text-xs"
+                  className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-2.5 py-1.5 text-xs font-mono"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-semibold text-zinc-500 uppercase">Notes & Assortment Preferences</label>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase">Notes & Assortment Preferences</label>
               <textarea
                 rows={3}
                 placeholder="Requested colorways, size curves (30% S, 40% M, 30% L), pro-shop display setup..."
                 value={formData.notes || ''}
                 onChange={(e) => handleChange('notes', e.target.value)}
-                className="mt-1 w-full bg-white border border-zinc-300 rounded px-2.5 py-1.5 text-xs"
+                className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-2.5 py-1.5 text-xs"
               />
             </div>
           </div>
         </div>
 
-        <div className="h-14 px-6 border-t border-[#e4e4e7] flex items-center justify-end gap-3 shrink-0 bg-white">
-          <button onClick={onClose} className="px-3.5 py-1.5 border border-[#e4e4e7] rounded-md text-xs font-medium text-zinc-600">
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-[#18181b] hover:bg-[#27272a] text-white text-xs font-semibold rounded-md shadow-subtle disabled:opacity-50"
-          >
-            <Save className="w-3.5 h-3.5" />
-            <span>{isSaving ? 'Saving...' : 'Save Account'}</span>
-          </button>
+        <div className="h-16 px-6 border-t border-[#e4e4e7] flex items-center justify-between shrink-0 bg-white">
+          <div className="text-[11px] text-zinc-400 font-mono">ESC to close</div>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={onClose}
+              className="px-3.5 py-1.5 border border-[#e4e4e7] rounded-md text-xs font-medium text-zinc-600 hover:bg-zinc-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-[#18181b] hover:bg-[#27272a] text-white text-xs font-semibold rounded-md shadow-subtle disabled:opacity-50"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{isSaving ? 'Saving...' : 'Save Account'}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -463,7 +521,7 @@ function NewWholesaleModal({
         <div className="h-12 px-5 border-b border-[#e4e4e7] flex items-center justify-between bg-[#fafafa]">
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-zinc-900" />
-            <span className="font-semibold text-xs text-[#09090b]">Add Wholesale Studio Account</span>
+            <span className="font-bold text-xs text-[#09090b]">Add Wholesale Studio Account</span>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700">
             <X className="w-4 h-4" />
@@ -472,7 +530,7 @@ function NewWholesaleModal({
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           <div>
-            <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Studio / Gym Name *</label>
+            <label className="block text-[11px] font-bold text-zinc-600 mb-1">Studio / Gym Name *</label>
             <input
               type="text"
               required
@@ -485,7 +543,7 @@ function NewWholesaleModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Account Type</label>
+              <label className="block text-[11px] font-bold text-zinc-600 mb-1">Account Type</label>
               <select
                 value={accountType}
                 onChange={(e) => setAccountType(e.target.value as StudioAccountType)}
@@ -497,7 +555,7 @@ function NewWholesaleModal({
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">City / Location *</label>
+              <label className="block text-[11px] font-bold text-zinc-600 mb-1">City / Location *</label>
               <input
                 type="text"
                 required
@@ -511,7 +569,7 @@ function NewWholesaleModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Buyer Name *</label>
+              <label className="block text-[11px] font-bold text-zinc-600 mb-1">Buyer Name *</label>
               <input
                 type="text"
                 required
@@ -522,18 +580,18 @@ function NewWholesaleModal({
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Estimated Order (₹)</label>
+              <label className="block text-[11px] font-bold text-zinc-600 mb-1">Estimated Order (₹)</label>
               <input
                 type="number"
                 value={estimatedOrderValue}
                 onChange={(e) => setEstimatedOrderValue(Number(e.target.value))}
-                className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-3 py-1.5 font-mono"
+                className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-3 py-1.5 font-mono font-bold"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Buyer Email *</label>
+            <label className="block text-[11px] font-bold text-zinc-600 mb-1">Buyer Email *</label>
             <input
               type="email"
               required

@@ -6,10 +6,13 @@ import AthletesKanban from '@/components/AthletesKanban';
 import AthletesTable from '@/components/AthletesTable';
 import AthleteDrawer from '@/components/AthleteDrawer';
 import NewAthleteModal from '@/components/NewAthleteModal';
+import CommandPalette from '@/components/CommandPalette';
 import { AthleteCreator, SeedingStage } from '@/lib/types';
-import { Sparkles, Package, Award, CheckCircle2, TrendingUp } from 'lucide-react';
+import { Sparkles, Package, Award, TrendingUp } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 export default function AthletesPage() {
+  const { showToast } = useToast();
   const [athletes, setAthletes] = useState<AthleteCreator[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +20,7 @@ export default function AthletesPage() {
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteCreator | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   const fetchAthletes = async () => {
     try {
@@ -43,7 +47,9 @@ export default function AthletesPage() {
         !searchTerm ||
         a.handle.toLowerCase().includes(searchTerm.toLowerCase()) ||
         a.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.niche.toLowerCase().includes(searchTerm.toLowerCase());
+        a.niche.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.top_size.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.bottom_size.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesNiche =
         filterNiche === 'All Niches' || a.niche === filterNiche;
@@ -66,7 +72,7 @@ export default function AthletesPage() {
       });
     } catch (err) {
       console.error('Failed to update stage:', err);
-      fetchAthletes(); // rollback
+      fetchAthletes();
     }
   };
 
@@ -105,8 +111,12 @@ export default function AthletesPage() {
   };
 
   // Metric summaries
-  const totalShipped = athletes.filter((a) => a.stage === 'kit_shipped' || a.stage === 'post_live' || a.stage === 'ambassador').length;
-  const totalPostsLive = athletes.filter((a) => a.stage === 'post_live' || a.stage === 'ambassador').length;
+  const totalShipped = athletes.filter(
+    (a) => a.stage === 'kit_shipped' || a.stage === 'post_live' || a.stage === 'ambassador'
+  ).length;
+  const totalPostsLive = athletes.filter(
+    (a) => a.stage === 'post_live' || a.stage === 'ambassador'
+  ).length;
   const totalAmbassadors = athletes.filter((a) => a.stage === 'ambassador').length;
 
   return (
@@ -123,12 +133,14 @@ export default function AthletesPage() {
         onFilterNicheChange={setFilterNiche}
         onNewClick={() => setIsNewModalOpen(true)}
         newButtonLabel="+ Add Athlete"
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
       {/* Main View Area */}
       {loading ? (
-        <div className="flex-1 flex items-center justify-center text-xs text-[#71717a]">
-          Loading activewear creators...
+        <div className="flex-1 flex flex-col items-center justify-center text-xs text-[#71717a] gap-2">
+          <div className="w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+          <span>Loading activewear creators...</span>
         </div>
       ) : viewMode === 'kanban' ? (
         <AthletesKanban
@@ -145,28 +157,42 @@ export default function AthletesPage() {
       )}
 
       {/* Bottom KPI Metrics Ticker */}
-      <div className="h-10 px-6 bg-white border-t border-[#e4e4e7] flex items-center justify-between text-xs text-[#71717a] shrink-0">
+      <div className="h-10 px-6 bg-white border-t border-[#e4e4e7] flex items-center justify-between text-xs text-[#71717a] shrink-0 select-none">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-zinc-600" />
-            <span>Total Creators: <strong className="text-[#09090b] font-semibold">{athletes.length}</strong></span>
+            <span>
+              Creators:{' '}
+              <strong className="text-[#09090b] font-semibold">{athletes.length}</strong>
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Package className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Kits Dispatched: <strong className="text-indigo-900 font-semibold">{totalShipped}</strong></span>
+            <span>
+              Kits Dispatched:{' '}
+              <strong className="text-indigo-900 font-semibold">{totalShipped}</strong>
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Content Live: <strong className="text-emerald-900 font-semibold">{totalPostsLive}</strong></span>
+            <span>
+              Content Live:{' '}
+              <strong className="text-emerald-900 font-semibold">{totalPostsLive}</strong>
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Award className="w-3.5 h-3.5 text-purple-600" />
-            <span>Brand Ambassadors: <strong className="text-purple-900 font-semibold">{totalAmbassadors}</strong></span>
+            <span>
+              Ambassadors:{' '}
+              <strong className="text-purple-900 font-semibold">{totalAmbassadors}</strong>
+            </span>
           </div>
         </div>
 
-        <div className="text-[11px] font-mono text-[#a1a1aa]">
-          Connected to Supabase • 0ms Edge
+        <div className="flex items-center gap-4 text-[11px] font-mono text-[#a1a1aa]">
+          <span>Press ⌘K for Command Bar</span>
+          <span>•</span>
+          <span>Supabase Singapore (aws-0)</span>
         </div>
       </div>
 
@@ -185,7 +211,16 @@ export default function AthletesPage() {
         onCreated={(newAthlete) => {
           setAthletes((prev) => [newAthlete, ...prev]);
           setSelectedAthlete(newAthlete);
+          showToast(`Added ${newAthlete.handle} to Drop 1 pipeline`);
         }}
+      />
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onOpenNewAthlete={() => setIsNewModalOpen(true)}
+        onSelectAthlete={(athlete) => setSelectedAthlete(athlete)}
       />
     </div>
   );
