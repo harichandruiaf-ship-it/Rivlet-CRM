@@ -123,8 +123,8 @@ export default function AthletesPage() {
     <div className="flex flex-col h-full bg-[#fbfbfb]">
       {/* Top Header Bar */}
       <TopBar
-        title="Athlete & Creator Seeding Hub"
-        subtitle="Activewear seeding, fit sampling & influencer pipeline"
+        title="Athletes & Seeding"
+        subtitle="Creator gifting pipeline and fit profiles"
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         viewMode={viewMode}

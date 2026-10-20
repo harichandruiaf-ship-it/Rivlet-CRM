@@ -120,8 +120,8 @@ export default function WholesalePage() {
   return (
     <div className="flex flex-col h-full bg-[#fbfbfb]">
       <TopBar
-        title="B2B Wholesale & Studio Pipeline"
-        subtitle="Pilates, Yoga studios, and Gym pro-shop accounts"
+        title="Wholesale Studios"
+        subtitle="Studio accounts, stockists & bulk orders"
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onNewClick={() => setIsNewModalOpen(true)}

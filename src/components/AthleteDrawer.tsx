@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { useDrops } from '@/components/DropContext';
+import PlatformIcon from './PlatformIcon';
 
 interface AthleteDrawerProps {
   athlete: AthleteCreator | null;
@@ -106,10 +107,8 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
         {/* Drawer Header */}
         <div className="h-16 px-4 sm:px-6 border-b border-[#e4e4e7] flex items-center justify-between shrink-0 bg-[#fafafa]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-500 p-0.5">
-              <div className="w-full h-full bg-white rounded-full flex items-center justify-center font-bold text-xs text-zinc-900">
-                <Instagram className="w-4 h-4 text-pink-600" />
-              </div>
+            <div className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+              <PlatformIcon platform={formData.platform} className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">

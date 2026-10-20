@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { AthleteCreator, SeedingStage } from '@/lib/types';
-import { Instagram, Package, ExternalLink, ArrowUpDown } from 'lucide-react';
+import { Package, ExternalLink, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { useDrops } from './DropContext';
+import PlatformIcon from './PlatformIcon';
 
 interface AthletesTableProps {
   athletes: AthleteCreator[];
@@ -101,7 +102,7 @@ export default function AthletesTable({ athletes, onSelectAthlete, onUpdateStage
                     </div>
                     <div>
                       <div className="font-bold text-xs text-[#09090b] group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
-                        <Instagram className="w-3.5 h-3.5 text-pink-600 shrink-0" />
+                        <PlatformIcon platform={athlete.platform} className="w-3.5 h-3.5" />
                         <span>{athlete.handle}</span>
                       </div>
                       <div className="text-[11px] text-[#71717a] font-medium">{athlete.full_name}</div>

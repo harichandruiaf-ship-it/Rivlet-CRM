@@ -5,8 +5,16 @@ import TopBar from '@/components/TopBar';
 import CommandPalette from '@/components/CommandPalette';
 import EditContactModal from '@/components/EditContactModal';
 import { CRMContact, ContactCategory } from '@/lib/types';
-import { Users, Trash2, Pencil, Plus, Mail, Phone } from 'lucide-react';
+import { Users, Trash2, Pencil, Plus, Mail, Phone, ArrowUpDown, ArrowUp, ArrowDown, Filter } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+
+const CATEGORIES = [
+  'All',
+  'VIP Waitlist',
+  'Press/Media',
+  'Fitness Coach',
+  'Community Leader',
+];
 
 export default function ContactsPage() {
   const { showToast } = useToast();
@@ -14,6 +22,9 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedContact, setSelectedContact] = useState<CRMContact | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [sortField, setSortField] = useState<'full_name' | 'category' | 'city' | 'email' | 'phone' | 'status'>('full_name');
+  const [sortAsc, setSortAsc] = useState(true);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
@@ -35,17 +46,36 @@ export default function ContactsPage() {
     fetchContacts();
   }, []);
 
-  const filteredContacts = useMemo(() => {
-    return contacts.filter((c) => {
-      return (
+  const handleSort = (field: 'full_name' | 'category' | 'city' | 'email' | 'phone' | 'status') => {
+    if (sortField === field) {
+      setSortAsc(!sortAsc);
+    } else {
+      setSortField(field);
+      setSortAsc(true);
+    }
+  };
+
+  const filteredAndSortedContacts = useMemo(() => {
+    const list = contacts.filter((c) => {
+      const matchesSearch =
         !searchTerm ||
         c.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (c.city && c.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        c.category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+        c.category.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === 'All' || c.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
     });
-  }, [contacts, searchTerm]);
+
+    return [...list].sort((a, b) => {
+      const valA = (a[sortField] || '').toString().toLowerCase();
+      const valB = (b[sortField] || '').toString().toLowerCase();
+      return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+  }, [contacts, searchTerm, selectedCategory, sortField, sortAsc]);
 
   const handleDelete = async (id: string, name: string) => {
     if (confirm(`Delete ${name}?`)) {
@@ -62,8 +92,8 @@ export default function ContactsPage() {
   return (
     <div className="flex flex-col h-full bg-[#fafafa]">
       <TopBar
-        title="VIP Waitlist & Press Media Relations"
-        subtitle="Exclusive pre-launch buyers, fitness press editors & community leaders"
+        title="VIP & Press Directory"
+        subtitle="Pre-launch waitlist, press editors, and brand contacts"
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onNewClick={() => setIsNewModalOpen(true)}
@@ -78,63 +108,197 @@ export default function ContactsPage() {
         </div>
       ) : (
         <div className="flex-1 overflow-auto bg-white p-3 sm:p-6 md:p-8 pb-24 md:pb-8">
-          <div className="max-w-6xl mx-auto overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                  <th className="pb-3 px-4">Contact</th>
-                  <th className="pb-3 px-4">Category</th>
-                  <th className="pb-3 px-4">Location</th>
-                  <th className="pb-3 px-4">Email</th>
-                  <th className="pb-3 px-4">Phone</th>
-                  <th className="pb-3 px-4">Status</th>
-                  <th className="pb-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {filteredContacts.map((c) => (
-                  <tr
-                    key={c.id}
-                    onClick={() => setSelectedContact(c)}
-                    className="hover:bg-zinc-50/70 transition-colors cursor-pointer group"
-                  >
-                    <td className="py-4 px-4 font-semibold text-zinc-900 group-hover:text-blue-600 transition-colors">
-                      {c.full_name}
-                    </td>
-                    <td className="py-4 px-4 text-zinc-600">
-                      {c.category}
-                    </td>
-                    <td className="py-4 px-4 text-zinc-500 font-medium">{c.city || '—'}</td>
-                    <td className="py-4 px-4 text-zinc-500 font-mono text-[11px]">{c.email || '—'}</td>
-                    <td className="py-4 px-4 text-zinc-500 font-mono text-[11px]">{c.phone || '—'}</td>
-                    <td className="py-4 px-4">
-                      <span className="inline-flex items-center gap-1.5 text-zinc-700 font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>{c.status}</span>
+          <div className="max-w-6xl mx-auto space-y-4">
+            {/* Category Filter Pills Bar */}
+            <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1 scrollbar-none border-b border-zinc-100">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[11px] font-semibold text-zinc-400 flex items-center gap-1 mr-1">
+                  <Filter className="w-3 h-3 text-zinc-400" />
+                  <span>Filter:</span>
+                </span>
+                {CATEGORIES.map((cat) => {
+                  const isSelected = selectedCategory === cat;
+                  const count = cat === 'All'
+                    ? contacts.length
+                    : contacts.filter((c) => c.category === cat).length;
+
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-zinc-900 text-white shadow-sm'
+                          : 'bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/70 hover:text-zinc-900'
+                      }`}
+                    >
+                      <span>{cat}</span>
+                      <span className={`text-[10px] font-mono ${isSelected ? 'text-zinc-300' : 'text-zinc-400'}`}>
+                        {count}
                       </span>
-                    </td>
-                    <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => setSelectedContact(c)}
-                          className="text-zinc-400 hover:text-zinc-800 p-1.5 rounded-md hover:bg-zinc-100 transition-colors"
-                          title="Edit Contact"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(c.id, c.full_name)}
-                          className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-md hover:bg-rose-50 transition-colors"
-                          title="Delete Contact"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="text-[11px] text-zinc-400 font-mono hidden sm:block shrink-0">
+                Click column headers to sort
+              </div>
+            </div>
+
+            {/* Data Table with Clickable Sort Headers */}
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider select-none">
+                    {/* Contact Name Sort */}
+                    <th
+                      className="pb-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      onClick={() => handleSort('full_name')}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className={sortField === 'full_name' ? 'text-zinc-900 font-bold' : ''}>Contact</span>
+                        {sortField === 'full_name' ? (
+                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
+                        )}
                       </div>
-                    </td>
+                    </th>
+
+                    {/* Category Sort */}
+                    <th
+                      className="pb-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      onClick={() => handleSort('category')}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className={sortField === 'category' ? 'text-zinc-900 font-bold' : ''}>Category</span>
+                        {sortField === 'category' ? (
+                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Location Sort */}
+                    <th
+                      className="pb-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      onClick={() => handleSort('city')}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className={sortField === 'city' ? 'text-zinc-900 font-bold' : ''}>Location</span>
+                        {sortField === 'city' ? (
+                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Email Sort */}
+                    <th
+                      className="pb-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      onClick={() => handleSort('email')}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className={sortField === 'email' ? 'text-zinc-900 font-bold' : ''}>Email</span>
+                        {sortField === 'email' ? (
+                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Phone Sort */}
+                    <th
+                      className="pb-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      onClick={() => handleSort('phone')}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className={sortField === 'phone' ? 'text-zinc-900 font-bold' : ''}>Phone</span>
+                        {sortField === 'phone' ? (
+                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Status Sort */}
+                    <th
+                      className="pb-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      onClick={() => handleSort('status')}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className={sortField === 'status' ? 'text-zinc-900 font-bold' : ''}>Status</span>
+                        {sortField === 'status' ? (
+                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </div>
+                    </th>
+
+                    <th className="pb-3 px-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {filteredAndSortedContacts.map((c) => (
+                    <tr
+                      key={c.id}
+                      onClick={() => setSelectedContact(c)}
+                      className="hover:bg-zinc-50/70 transition-colors cursor-pointer group"
+                    >
+                      <td className="py-4 px-4 font-semibold text-zinc-900 group-hover:text-blue-600 transition-colors">
+                        {c.full_name}
+                      </td>
+                      <td className="py-4 px-4 text-zinc-600">
+                        <span className="px-2 py-0.5 rounded-full bg-zinc-100 border border-zinc-200 text-[11px] font-medium text-zinc-700">
+                          {c.category}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-zinc-500 font-medium">{c.city || '—'}</td>
+                      <td className="py-4 px-4 text-zinc-500 font-mono text-[11px]">{c.email || '—'}</td>
+                      <td className="py-4 px-4 text-zinc-500 font-mono text-[11px]">{c.phone || '—'}</td>
+                      <td className="py-4 px-4">
+                        <span className="inline-flex items-center gap-1.5 text-zinc-700 font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span>{c.status}</span>
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => setSelectedContact(c)}
+                            className="text-zinc-400 hover:text-zinc-800 p-1.5 rounded-md hover:bg-zinc-100 transition-colors"
+                            title="Edit Contact"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(c.id, c.full_name)}
+                            className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-md hover:bg-rose-50 transition-colors"
+                            title="Delete Contact"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {filteredAndSortedContacts.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-zinc-400 text-xs">
+                        No contacts found matching your criteria
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

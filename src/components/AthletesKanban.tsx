@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { useDrops } from './DropContext';
+import PlatformIcon from './PlatformIcon';
 
 interface AthletesKanbanProps {
   athletes: AthleteCreator[];
@@ -132,25 +133,46 @@ export default function AthletesKanban({ athletes, onSelectAthlete, onUpdateStag
                     onClick={() => onSelectAthlete(athlete)}
                     className="p-4 rounded-xl bg-white border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-zinc-400/80 hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-grab active:cursor-grabbing transition-all group relative select-none"
                   >
-                    {/* Header: Handle & External Link */}
+                    {/* Header: Platform Icon, Handle, External Link & Non-overlapping Next Button */}
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5 min-w-0">
+                        <PlatformIcon platform={athlete.platform} className="w-3.5 h-3.5" />
                         <span className="font-semibold text-xs text-zinc-900 group-hover:text-blue-600 transition-colors truncate">
                           {athlete.handle}
                         </span>
                         <a
-                          href={`https://instagram.com/${athlete.handle.replace('@', '')}`}
+                          href={
+                            athlete.platform === 'YouTube'
+                              ? `https://youtube.com/${athlete.handle.replace('@', '')}`
+                              : athlete.platform === 'TikTok'
+                              ? `https://tiktok.com/@${athlete.handle.replace('@', '')}`
+                              : `https://instagram.com/${athlete.handle.replace('@', '')}`
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-zinc-700 transition-opacity"
+                          title={`Open ${athlete.platform || 'Social'} profile`}
                         >
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
-                      <span className="text-[11px] text-zinc-400">
-                        {athlete.niche}
-                      </span>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[11px] text-zinc-400">
+                          {athlete.niche}
+                        </span>
+                        {col.key !== 'ambassador' && (
+                          <button
+                            onClick={(e) => handleAdvanceStage(e, athlete)}
+                            className="opacity-0 group-hover:opacity-100 bg-zinc-900 hover:bg-zinc-800 text-white rounded px-1.5 py-0.5 text-[10px] font-semibold flex items-center gap-0.5 transition-all shadow-sm"
+                            title="Advance to next pipeline stage"
+                          >
+                            <span>Next</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {/* Creator Full Name */}
@@ -167,14 +189,14 @@ export default function AthletesKanban({ athletes, onSelectAthlete, onUpdateStag
                       <span>{athlete.inseam_length}</span>
                     </div>
 
-                    {/* Minimal Dispatch / Post Indicator */}
+                    {/* Minimal Dispatch / Post Indicator (Never blocked by Next button!) */}
                     {athlete.tracking_number && (
-                      <div className="mt-2.5 pt-2 border-t border-zinc-50 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+                      <div className="mt-2.5 pt-2 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-600 font-mono">
                         <span className="truncate">{athlete.courier_partner}: {athlete.tracking_number}</span>
                         <button
                           onClick={(e) => handleCopyTracking(e, athlete.tracking_number!)}
-                          className="text-zinc-400 hover:text-zinc-700 p-0.5"
-                          title="Copy AWB"
+                          className="text-zinc-400 hover:text-zinc-800 p-1 hover:bg-zinc-100 rounded transition-colors"
+                          title="Copy AWB Tracking Number"
                         >
                           <Copy className="w-3 h-3" />
                         </button>
@@ -197,18 +219,6 @@ export default function AthletesKanban({ athletes, onSelectAthlete, onUpdateStag
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
-                    )}
-
-                    {/* Minimal Hover Next Step Action */}
-                    {col.key !== 'ambassador' && (
-                      <button
-                        onClick={(e) => handleAdvanceStage(e, athlete)}
-                        className="opacity-0 group-hover:opacity-100 absolute bottom-3 right-3 bg-zinc-900 text-white rounded-md p-1 shadow hover:bg-zinc-800 transition-all text-[10px] flex items-center gap-0.5 px-2 font-medium"
-                        title="Move to next stage"
-                      >
-                        <span>Next</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </button>
                     )}
                   </div>
                 ))}

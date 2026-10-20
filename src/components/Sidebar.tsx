@@ -86,13 +86,13 @@ export default function Sidebar() {
         <div>
           <div className="h-16 px-4 border-b border-zinc-100 flex items-center justify-between">
             {isCollapsed ? (
-              /* Collapsed: Show only Wave Logo Mark */
+              /* Collapsed: Show only Wave Logo Mark (Prominent size) */
               <div className="w-full flex items-center justify-center">
                 <Link href="/" title="Rivlet Activewear">
                   <img
                     src="/brand/rivlet-logo-mark.png"
                     alt="Rivlet Logo"
-                    className="h-6 w-auto object-contain hover:opacity-80 transition-opacity"
+                    className="h-9 w-auto object-contain hover:opacity-80 transition-opacity"
                   />
                 </Link>
               </div>
@@ -103,7 +103,7 @@ export default function Sidebar() {
                   <img
                     src="/brand/rivlet-logo-combined.png"
                     alt="Rivlet Activewear"
-                    className="h-6 w-auto object-contain hover:opacity-90 transition-opacity"
+                    className="h-7 w-auto object-contain hover:opacity-90 transition-opacity"
                   />
                 </Link>
                 <button
@@ -316,7 +316,7 @@ export default function Sidebar() {
                   <img
                     src="/brand/rivlet-logo-combined.png"
                     alt="Rivlet Activewear"
-                    className="h-6 w-auto object-contain"
+                    className="h-7 w-auto object-contain"
                   />
                 </Link>
                 <button
