@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
 import { ToastProvider } from '@/components/ui/Toast';
@@ -8,6 +8,12 @@ import NewDropModal from '@/components/NewDropModal';
 export const metadata: Metadata = {
   title: 'Rivlet CRM — Activewear Operations & Growth',
   description: 'Lightweight, high-scale CRM for Rivlet Activewear — Athletes, Wholesale Studios, and VIP Relations.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

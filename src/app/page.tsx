@@ -156,8 +156,8 @@ export default function AthletesPage() {
         />
       )}
 
-      {/* Bottom KPI Metrics Ticker */}
-      <div className="h-10 px-6 bg-white border-t border-[#e4e4e7] flex items-center justify-between text-xs text-[#71717a] shrink-0 select-none">
+      {/* Bottom KPI Metrics Ticker (Desktop / Laptops / Tablets) */}
+      <div className="h-10 px-4 sm:px-6 bg-white border-t border-[#e4e4e7] hidden md:flex items-center justify-between text-xs text-[#71717a] shrink-0 select-none">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-zinc-600" />

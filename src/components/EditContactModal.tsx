@@ -61,10 +61,10 @@ export default function EditContactModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-150">
+      <div className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-lg bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="h-14 px-6 border-b border-zinc-100 flex items-center justify-between">
+        <div className="h-14 px-4 sm:px-6 border-b border-zinc-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-900">
               <Users className="w-4 h-4" />
@@ -100,7 +100,7 @@ export default function EditContactModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1">
           <div>
             <label className="block text-xs font-medium text-zinc-700 mb-1">Full Name *</label>
             <input

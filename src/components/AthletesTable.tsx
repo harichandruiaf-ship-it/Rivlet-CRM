@@ -52,8 +52,8 @@ export default function AthletesTable({ athletes, onSelectAthlete, onUpdateStage
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-white select-none">
-      <table className="w-full text-left border-collapse text-xs">
+    <div className="flex-1 overflow-auto bg-white select-none pb-20 md:pb-0">
+      <table className="w-full min-w-[750px] text-left border-collapse text-xs">
         {/* Table Header with Sort */}
         <thead className="sticky top-0 bg-[#fafafa] border-b border-[#e4e4e7] z-10 text-[11px] font-bold text-[#71717a] uppercase tracking-wider">
           <tr>

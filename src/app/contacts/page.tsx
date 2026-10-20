@@ -77,9 +77,9 @@ export default function ContactsPage() {
           <span>Loading directory...</span>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto bg-white p-8">
-          <div className="max-w-6xl mx-auto">
-            <table className="w-full text-left border-collapse text-xs">
+        <div className="flex-1 overflow-auto bg-white p-3 sm:p-6 md:p-8 pb-24 md:pb-8">
+          <div className="max-w-6xl mx-auto overflow-x-auto">
+            <table className="w-full min-w-[700px] text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
                   <th className="pb-3 px-4">Contact</th>
@@ -216,9 +216,9 @@ function NewContactModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden">
-        <div className="h-14 px-6 border-b border-zinc-100 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-150">
+      <div className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden max-h-[90vh] flex flex-col">
+        <div className="h-14 px-4 sm:px-6 border-b border-zinc-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-900">
               <Users className="w-4 h-4" />
@@ -234,7 +234,7 @@ function NewContactModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1">
           <div>
             <label className="block text-xs font-medium text-zinc-700 mb-1">Full Name *</label>
             <input

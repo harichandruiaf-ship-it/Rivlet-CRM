@@ -197,9 +197,9 @@ export default function CommandPalette({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-24 bg-black/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-xl bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden flex flex-col"
+        className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-xl bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden flex flex-col max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}

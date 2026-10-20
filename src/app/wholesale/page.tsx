@@ -135,8 +135,8 @@ export default function WholesalePage() {
           <span>Loading wholesale pipeline...</span>
         </div>
       ) : (
-        <div className="flex-1 overflow-x-auto p-6">
-          <div className="flex gap-4 min-w-[1240px] h-full items-start">
+        <div className="flex-1 overflow-x-auto p-3 sm:p-5 md:p-6 pb-24 md:pb-6 touch-pan-x">
+          <div className="flex gap-4 min-w-[1100px] sm:min-w-[1240px] h-full items-start">
             {STAGES.map((col) => {
               const colAccounts = filteredAccounts.filter((a) => a.stage === col.key);
               const colValue = colAccounts.reduce((acc, a) => acc + Number(a.estimated_order_value || 0), 0);
@@ -304,8 +304,8 @@ function WholesaleDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-sm">
       <div className="flex-1" onClick={onClose} />
-      <div className="w-[520px] bg-white h-full shadow-drawer border-l border-[#e4e4e7] flex flex-col animate-slide-in">
-        <div className="h-16 px-6 border-b border-[#e4e4e7] flex items-center justify-between shrink-0 bg-[#fafafa]">
+      <div className="w-full sm:w-[480px] md:w-[520px] max-w-full bg-white h-full shadow-drawer border-l border-[#e4e4e7] flex flex-col animate-slide-in">
+        <div className="h-16 px-4 sm:px-6 border-b border-[#e4e4e7] flex items-center justify-between shrink-0 bg-[#fafafa]">
           <div>
             <div className="font-bold text-sm text-[#09090b]">{formData.business_name}</div>
             <div className="text-[11px] text-[#71717a] font-medium">
@@ -325,7 +325,7 @@ function WholesaleDrawer({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 text-xs">
           <div>
             <label className="block text-[11px] font-bold text-zinc-600 uppercase mb-2">
               Pipeline Stage
@@ -437,7 +437,7 @@ function WholesaleDrawer({
           </div>
         </div>
 
-        <div className="h-16 px-6 border-t border-[#e4e4e7] flex items-center justify-between shrink-0 bg-white">
+        <div className="h-16 px-4 sm:px-6 border-t border-[#e4e4e7] flex items-center justify-between shrink-0 bg-white">
           <div className="text-[11px] text-zinc-400 font-mono">ESC to close</div>
           <div className="flex items-center gap-2.5">
             <button
@@ -509,9 +509,9 @@ function NewWholesaleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e4e4e7] overflow-hidden animate-slide-in">
-        <div className="h-12 px-5 border-b border-[#e4e4e7] flex items-center justify-between bg-[#fafafa]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4">
+      <div className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md bg-white rounded-xl shadow-2xl border border-[#e4e4e7] overflow-hidden animate-slide-in max-h-[90vh] flex flex-col">
+        <div className="h-12 px-4 sm:px-5 border-b border-[#e4e4e7] flex items-center justify-between bg-[#fafafa] shrink-0">
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-zinc-900" />
             <span className="font-bold text-xs text-[#09090b]">Add Wholesale Studio Account</span>
@@ -521,7 +521,7 @@ function NewWholesaleModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 text-xs overflow-y-auto flex-1">
           <div>
             <label className="block text-[11px] font-bold text-zinc-600 mb-1">Studio / Gym Name *</label>
             <input

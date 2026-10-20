@@ -94,8 +94,8 @@ export default function AthletesKanban({ athletes, onSelectAthlete, onUpdateStag
   };
 
   return (
-    <div className="flex-1 overflow-x-auto p-8 bg-[#fafafa]">
-      <div className="flex gap-6 min-w-[1300px] h-full items-start">
+    <div className="flex-1 overflow-x-auto p-3 sm:p-5 md:p-8 pb-24 md:pb-8 bg-[#fafafa] touch-pan-x">
+      <div className="flex gap-4 sm:gap-6 min-w-[1100px] sm:min-w-[1280px] h-full items-start">
         {STAGES.map((col) => {
           const colAthletes = displayAthletes.filter((a) => a.stage === col.key);
           const isOver = dragOverStage === col.key;

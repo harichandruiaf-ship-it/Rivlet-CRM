@@ -102,9 +102,9 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
       <div className="flex-1" onClick={onClose} />
 
       {/* Drawer Surface */}
-      <div className="w-[560px] bg-white h-full shadow-drawer border-l border-[#e4e4e7] flex flex-col animate-slide-in">
+      <div className="w-full sm:w-[500px] md:w-[560px] max-w-full bg-white h-full shadow-drawer border-l border-[#e4e4e7] flex flex-col animate-slide-in">
         {/* Drawer Header */}
-        <div className="h-16 px-6 border-b border-[#e4e4e7] flex items-center justify-between shrink-0 bg-[#fafafa]">
+        <div className="h-16 px-4 sm:px-6 border-b border-[#e4e4e7] flex items-center justify-between shrink-0 bg-[#fafafa]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-500 p-0.5">
               <div className="w-full h-full bg-white rounded-full flex items-center justify-center font-bold text-xs text-zinc-900">
@@ -150,7 +150,7 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
         </div>
 
         {/* Tab Switcher */}
-        <div className="px-6 border-b border-[#e4e4e7] flex items-center gap-6 bg-white text-xs font-semibold shrink-0">
+        <div className="px-4 sm:px-6 border-b border-[#e4e4e7] flex items-center gap-3 sm:gap-6 bg-white text-xs font-semibold shrink-0 overflow-x-auto">
           <button
             onClick={() => setActiveTab('sizing')}
             className={`py-3 border-b-2 flex items-center gap-1.5 transition-all ${
@@ -187,7 +187,7 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
         </div>
 
         {/* Drawer Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 text-xs">
           {/* Target Drop Selector */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
@@ -528,11 +528,11 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
         </div>
 
         {/* Drawer Sticky Footer */}
-        <div className="h-16 px-6 border-t border-[#e4e4e7] flex items-center justify-between shrink-0 bg-white">
-          <div className="text-[11px] text-zinc-400 font-mono">
+        <div className="h-16 px-4 sm:px-6 border-t border-[#e4e4e7] flex items-center justify-between shrink-0 bg-white">
+          <div className="hidden sm:block text-[11px] text-zinc-400 font-mono">
             ESC to close • ⌘S to save
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 ml-auto sm:ml-0">
             <button
               onClick={onClose}
               className="px-3.5 py-1.5 rounded-md border border-[#e4e4e7] text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"

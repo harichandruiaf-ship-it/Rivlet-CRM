@@ -71,10 +71,10 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#e4e4e7] overflow-hidden animate-slide-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4">
+      <div className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md bg-white rounded-xl shadow-2xl border border-[#e4e4e7] overflow-hidden animate-slide-in max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="h-12 px-5 border-b border-[#e4e4e7] flex items-center justify-between bg-[#fafafa]">
+        <div className="h-12 px-4 sm:px-5 border-b border-[#e4e4e7] flex items-center justify-between bg-[#fafafa] shrink-0">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-pink-600" />
             <span className="font-semibold text-xs text-[#09090b]">Add Athlete to Seeding Hub</span>
@@ -85,7 +85,7 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 text-xs overflow-y-auto flex-1">
           {error && (
             <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-700 text-xs">
               {error}

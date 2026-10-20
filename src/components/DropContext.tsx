@@ -12,6 +12,8 @@ interface DropContextType {
   refreshDrops: () => Promise<void>;
   isNewDropModalOpen: boolean;
   setIsNewDropModalOpen: (open: boolean) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
 }
 
 const DropContext = createContext<DropContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ export function DropProvider({ children }: { children: React.ReactNode }) {
   const [drops, setDrops] = useState<DropItem[]>([]);
   const [selectedDrop, setSelectedDrop] = useState<string>('all');
   const [isNewDropModalOpen, setIsNewDropModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const refreshDrops = useCallback(async () => {
     try {
@@ -71,6 +74,8 @@ export function DropProvider({ children }: { children: React.ReactNode }) {
         refreshDrops,
         isNewDropModalOpen,
         setIsNewDropModalOpen,
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
       }}
     >
       {children}
