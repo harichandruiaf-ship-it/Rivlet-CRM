@@ -39,6 +39,11 @@ export async function POST(request: Request) {
       email = '',
       phone = '',
       city = '',
+      full_address = '',
+      source = 'Website Waitlist',
+      vip_level = 'Level 2',
+      tier_color = 'Green',
+      estimated_spend = '₹0',
       status = 'Active',
       notes = '',
     } = body;
@@ -49,11 +54,24 @@ export async function POST(request: Request) {
 
     const sql = `
       INSERT INTO public.crm_contacts
-      (full_name, category, email, phone, city, status, notes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (full_name, category, email, phone, city, full_address, source, vip_level, tier_color, estimated_spend, status, notes)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *;
     `;
-    const params = [full_name, category, email, phone, city, status, notes];
+    const params = [
+      full_name,
+      category,
+      email,
+      phone,
+      city,
+      full_address,
+      source,
+      vip_level,
+      tier_color,
+      estimated_spend,
+      status,
+      notes,
+    ];
 
     const rows = await query(sql, params);
     return NextResponse.json({ success: true, data: rows[0] });
@@ -72,15 +90,35 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ success: false, error: 'Contact ID is required.' }, { status: 400 });
     }
 
-    const keys = Object.keys(updates);
-    if (keys.length === 0) {
-      return NextResponse.json({ success: false, error: 'No fields to update.' }, { status: 400 });
+    const ALLOWED_FIELDS = [
+      'full_name',
+      'category',
+      'email',
+      'phone',
+      'city',
+      'full_address',
+      'source',
+      'vip_level',
+      'tier_color',
+      'estimated_spend',
+      'status',
+      'notes',
+      'metadata',
+    ];
+
+    // Filter only valid database fields and omit created_at, updated_at, id to avoid duplicate assignment errors
+    const validKeys = Object.keys(updates).filter(
+      (k) => ALLOWED_FIELDS.includes(k) && k !== 'id' && k !== 'updated_at' && k !== 'created_at'
+    );
+
+    if (validKeys.length === 0) {
+      return NextResponse.json({ success: false, error: 'No valid fields to update.' }, { status: 400 });
     }
 
     const setClauses: string[] = [];
     const params: any[] = [id];
 
-    keys.forEach((key) => {
+    validKeys.forEach((key) => {
       params.push(updates[key]);
       setClauses.push(`${key} = $${params.length}`);
     });

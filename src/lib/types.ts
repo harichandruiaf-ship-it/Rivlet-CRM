@@ -86,6 +86,9 @@ export type ContactCategory =
   | 'Fitness Coach'
   | 'Community Leader';
 
+export type VIPLevel = 'Level 1' | 'Level 2' | 'Level 3' | 'Level 4';
+export type TierColor = 'Green' | 'Yellow' | 'Damper' | 'Red';
+
 export interface CRMContact {
   id: string;
   full_name: string;
@@ -93,6 +96,11 @@ export interface CRMContact {
   email?: string | null;
   phone?: string | null;
   city?: string | null;
+  full_address?: string | null;
+  source?: string | null;
+  vip_level?: VIPLevel | string;
+  tier_color?: TierColor | string;
+  estimated_spend?: string | null;
   status: string;
   notes?: string | null;
   metadata?: Record<string, any>;
