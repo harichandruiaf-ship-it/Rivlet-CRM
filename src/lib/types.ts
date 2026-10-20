@@ -1,4 +1,4 @@
-export type Platform = 'Instagram' | 'TikTok' | 'YouTube';
+export type Platform = 'Instagram' | 'TikTok' | 'YouTube' | 'Facebook';
 
 export interface DropItem {
   id: string;

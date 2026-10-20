@@ -134,9 +134,9 @@ export default function AthletesKanban({ athletes, onSelectAthlete, onUpdateStag
                     className="p-4 rounded-xl bg-white border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-zinc-400/80 hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-grab active:cursor-grabbing transition-all group relative select-none"
                   >
                     {/* Header: Platform Icon, Handle, External Link & Non-overlapping Next Button */}
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <PlatformIcon platform={athlete.platform} className="w-3.5 h-3.5" />
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-1">
+                        <PlatformIcon platform={athlete.platform} className="w-3.5 h-3.5 shrink-0" />
                         <span className="font-semibold text-xs text-zinc-900 group-hover:text-blue-600 transition-colors truncate">
                           {athlete.handle}
                         </span>
@@ -146,38 +146,40 @@ export default function AthletesKanban({ athletes, onSelectAthlete, onUpdateStag
                               ? `https://youtube.com/${athlete.handle.replace('@', '')}`
                               : athlete.platform === 'TikTok'
                               ? `https://tiktok.com/@${athlete.handle.replace('@', '')}`
+                              : athlete.platform === 'Facebook'
+                              ? `https://facebook.com/${athlete.handle.replace('@', '')}`
                               : `https://instagram.com/${athlete.handle.replace('@', '')}`
                           }
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-zinc-700 transition-opacity"
+                          className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-zinc-700 transition-opacity shrink-0"
                           title={`Open ${athlete.platform || 'Social'} profile`}
                         >
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[11px] text-zinc-400">
-                          {athlete.niche}
-                        </span>
-                        {col.key !== 'ambassador' && (
-                          <button
-                            onClick={(e) => handleAdvanceStage(e, athlete)}
-                            className="opacity-0 group-hover:opacity-100 bg-zinc-900 hover:bg-zinc-800 text-white rounded px-1.5 py-0.5 text-[10px] font-semibold flex items-center gap-0.5 transition-all shadow-sm"
-                            title="Advance to next pipeline stage"
-                          >
-                            <span>Next</span>
-                            <ChevronRight className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
+                      {col.key !== 'ambassador' && (
+                        <button
+                          onClick={(e) => handleAdvanceStage(e, athlete)}
+                          className="opacity-0 group-hover:opacity-100 bg-zinc-900 hover:bg-zinc-800 text-white rounded px-1.5 py-0.5 text-[10px] font-semibold flex items-center gap-0.5 transition-all shadow-sm shrink-0"
+                          title="Advance to next pipeline stage"
+                        >
+                          <span>Next</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
 
-                    {/* Creator Full Name */}
-                    <div className="text-[11px] text-zinc-500 mb-3 truncate">
-                      {athlete.full_name}
+                    {/* Sub-row: Full Name and Niche (Moved down so it NEVER hides the username!) */}
+                    <div className="flex items-center justify-between gap-1.5 text-[11px] mb-2.5">
+                      <span className="text-zinc-500 truncate font-medium">
+                        {athlete.full_name}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 bg-zinc-100/90 border border-zinc-200/70 rounded px-1.5 py-0.5 shrink-0 font-normal">
+                        {athlete.niche}
+                      </span>
                     </div>
 
                     {/* Minimalist Sizing Row (No chunky boxes, pure typography) */}

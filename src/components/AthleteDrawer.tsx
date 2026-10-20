@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { AthleteCreator, SeedingStage } from '@/lib/types';
+import { AthleteCreator, SeedingStage, Platform, AthleteNiche, FollowerTier } from '@/lib/types';
 import {
   X,
   Instagram,
@@ -18,6 +18,8 @@ import {
   Copy,
   CheckCircle2,
   Sparkles,
+  User,
+  Share2,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { useDrops } from '@/components/DropContext';
@@ -42,7 +44,7 @@ const COLORWAYS = [
 export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: AthleteDrawerProps) {
   const { showToast } = useToast();
   const { drops } = useDrops();
-  const [activeTab, setActiveTab] = useState<'sizing' | 'shipping' | 'roi'>('sizing');
+  const [activeTab, setActiveTab] = useState<'profile' | 'sizing' | 'shipping' | 'roi'>('profile');
   const [formData, setFormData] = useState<Partial<AthleteCreator>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -97,6 +99,14 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
     showToast(`Copied ${label} to clipboard`);
   };
 
+  const getProfileUrl = (platform?: string, handle?: string) => {
+    const cleanHandle = (handle || '').replace('@', '');
+    if (platform === 'YouTube') return `https://youtube.com/${cleanHandle}`;
+    if (platform === 'TikTok') return `https://tiktok.com/@${cleanHandle}`;
+    if (platform === 'Facebook') return `https://facebook.com/${cleanHandle}`;
+    return `https://instagram.com/${cleanHandle}`;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-sm transition-opacity">
       {/* Backdrop click to close */}
@@ -114,11 +124,11 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-[#09090b]">{formData.handle}</span>
                 <a
-                  href={`https://instagram.com/${(formData.handle || '').replace('@', '')}`}
+                  href={getProfileUrl(formData.platform, formData.handle)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-zinc-400 hover:text-zinc-700"
-                  title="Open Instagram Profile"
+                  title={`Open ${formData.platform || 'Social'} Profile`}
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
@@ -151,8 +161,19 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
         {/* Tab Switcher */}
         <div className="px-4 sm:px-6 border-b border-[#e4e4e7] flex items-center gap-3 sm:gap-6 bg-white text-xs font-semibold shrink-0 overflow-x-auto">
           <button
+            onClick={() => setActiveTab('profile')}
+            className={`py-3 border-b-2 flex items-center gap-1.5 transition-all shrink-0 ${
+              activeTab === 'profile'
+                ? 'border-zinc-900 text-zinc-900'
+                : 'border-transparent text-zinc-500 hover:text-zinc-800'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Profile & Social</span>
+          </button>
+          <button
             onClick={() => setActiveTab('sizing')}
-            className={`py-3 border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`py-3 border-b-2 flex items-center gap-1.5 transition-all shrink-0 ${
               activeTab === 'sizing'
                 ? 'border-zinc-900 text-zinc-900'
                 : 'border-transparent text-zinc-500 hover:text-zinc-800'
@@ -163,7 +184,7 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
           </button>
           <button
             onClick={() => setActiveTab('shipping')}
-            className={`py-3 border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`py-3 border-b-2 flex items-center gap-1.5 transition-all shrink-0 ${
               activeTab === 'shipping'
                 ? 'border-zinc-900 text-zinc-900'
                 : 'border-transparent text-zinc-500 hover:text-zinc-800'
@@ -174,7 +195,7 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
           </button>
           <button
             onClick={() => setActiveTab('roi')}
-            className={`py-3 border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`py-3 border-b-2 flex items-center gap-1.5 transition-all shrink-0 ${
               activeTab === 'roi'
                 ? 'border-zinc-900 text-zinc-900'
                 : 'border-transparent text-zinc-500 hover:text-zinc-800'
@@ -243,6 +264,87 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
               )}
             </div>
           </div>
+
+          {/* TAB 0: PROFILE & SOCIAL MEDIA ASSIGNMENT */}
+          {activeTab === 'profile' && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-zinc-900 font-bold text-xs">
+                    <Share2 className="w-4 h-4 text-zinc-800" />
+                    <span>Social Media & Handle Assignment</span>
+                  </div>
+                  <span className="text-[10px] text-zinc-400 font-mono">Platform Identity</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Social Media Platform</label>
+                    <select
+                      value={formData.platform || 'Instagram'}
+                      onChange={(e) => handleChange('platform', e.target.value as Platform)}
+                      className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-3 py-1.5 text-xs font-semibold text-zinc-900"
+                    >
+                      <option value="Instagram">Instagram</option>
+                      <option value="TikTok">TikTok</option>
+                      <option value="YouTube">YouTube</option>
+                      <option value="Facebook">Facebook</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Username / Handle</label>
+                    <input
+                      type="text"
+                      placeholder="@username"
+                      value={formData.handle || ''}
+                      onChange={(e) => handleChange('handle', e.target.value)}
+                      className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-3 py-1.5 text-xs font-mono font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Creator Full Name</label>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={formData.full_name || ''}
+                    onChange={(e) => handleChange('full_name', e.target.value)}
+                    className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-3 py-1.5 text-xs font-medium"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Fitness Niche</label>
+                    <select
+                      value={formData.niche || 'Pilates'}
+                      onChange={(e) => handleChange('niche', e.target.value as AthleteNiche)}
+                      className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-2.5 py-1.5 text-xs"
+                    >
+                      {['Pilates', 'Yoga', 'Hyrox & Strength', 'Marathon & Running', 'CrossFit & Functional', 'Mobility & Physio', 'Athleisure'].map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Follower Tier</label>
+                    <select
+                      value={formData.follower_tier || 'Micro (10k-50k)'}
+                      onChange={(e) => handleChange('follower_tier', e.target.value as FollowerTier)}
+                      className="mt-1 w-full bg-white border border-zinc-300 rounded-md px-2.5 py-1.5 text-xs"
+                    >
+                      {['Nano (<10k)', 'Micro (10k-50k)', 'Mid (50k-250k)', 'Macro (250k+)'].map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TAB 1: SIZING & FIT PROFILE */}
           {activeTab === 'sizing' && (

@@ -13,8 +13,6 @@ import {
   ArrowUp,
   ArrowDown,
   Filter,
-  ChevronUp,
-  ChevronDown,
   MapPin,
   Compass,
 } from 'lucide-react';
@@ -129,29 +127,10 @@ export default function ContactsPage() {
     setContacts((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
   };
 
-  // Quick Upgrade / Downgrade handler
-  const handleQuickTierChange = async (
-    contactId: string,
-    direction: 'upgrade' | 'downgrade' | VIPLevel
-  ) => {
+  // Direct Level Change handler via dropdown
+  const handleLevelChange = async (contactId: string, nextLevel: VIPLevel) => {
     const target = contacts.find((c) => c.id === contactId);
-    if (!target) return;
-
-    let nextLevel: VIPLevel;
-    if (direction === 'upgrade' || direction === 'downgrade') {
-      const currentIdx = LEVEL_ORDER.indexOf((target.vip_level as VIPLevel) || 'Level 2');
-      if (direction === 'upgrade') {
-        if (currentIdx <= 0) return; // Already Level 1
-        nextLevel = LEVEL_ORDER[currentIdx - 1];
-      } else {
-        if (currentIdx >= LEVEL_ORDER.length - 1) return; // Already Level 4
-        nextLevel = LEVEL_ORDER[currentIdx + 1];
-      }
-    } else {
-      nextLevel = direction;
-    }
-
-    if (nextLevel === target.vip_level) return;
+    if (!target || target.vip_level === nextLevel) return;
 
     // Optimistic UI update
     setContacts((prev) =>
@@ -166,17 +145,14 @@ export default function ContactsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(
-          `${target.full_name} moved to ${nextLevel}`,
-          'success'
-        );
+        showToast(`${target.full_name} updated to ${nextLevel}`, 'success');
       } else {
-        fetchContacts(); // Revert
-        showToast('Failed to update tier', 'error');
+        fetchContacts();
+        showToast('Failed to update level', 'error');
       }
     } catch {
       fetchContacts();
-      showToast('Network error while updating tier', 'error');
+      showToast('Network error while updating level', 'error');
     }
   };
 
@@ -186,41 +162,36 @@ export default function ContactsPage() {
       case 'Green':
         return {
           dot: 'bg-emerald-500 ring-2 ring-emerald-200',
-          badge: 'bg-emerald-50 text-emerald-800 border-emerald-200',
           label: 'Green (Hot)',
         };
       case 'Yellow':
         return {
           dot: 'bg-amber-400 ring-2 ring-amber-200',
-          badge: 'bg-amber-50 text-amber-800 border-amber-200',
           label: 'Yellow (Warm)',
         };
       case 'Damper':
         return {
           dot: 'bg-orange-500 ring-2 ring-orange-200',
-          badge: 'bg-orange-50 text-orange-800 border-orange-200',
           label: 'Damper (Follow-up)',
         };
       case 'Red':
         return {
           dot: 'bg-rose-500 ring-2 ring-rose-200',
-          badge: 'bg-rose-50 text-rose-800 border-rose-200',
           label: 'Red (Cold)',
         };
       default:
         return {
           dot: 'bg-emerald-500 ring-2 ring-emerald-200',
-          badge: 'bg-emerald-50 text-emerald-800 border-emerald-200',
           label: 'Green',
         };
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#fafafa]">
+    <div className="flex flex-col h-full bg-[#fbfbfb]">
       <TopBar
         title="VIP & Press Directory"
-        subtitle="Purchase power tiers, complete addresses, and acquisition channels"
+        subtitle="Pre-launch waitlist, VIP tiers, and press directory"
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onNewClick={() => setIsNewModalOpen(true)}
@@ -234,8 +205,8 @@ export default function ContactsPage() {
           <span>Loading directory...</span>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto bg-white p-3 sm:p-6 md:p-8 pb-24 md:pb-8">
-          <div className="max-w-7xl mx-auto space-y-4">
+        <div className="flex-1 overflow-y-auto bg-white p-3 sm:p-5 md:p-6 pb-20 md:pb-6">
+          <div className="w-full space-y-3">
             {/* Category Filter Pills Bar */}
             <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1 scrollbar-none border-b border-zinc-100">
               <div className="flex items-center gap-1.5 shrink-0">
@@ -256,7 +227,7 @@ export default function ContactsPage() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-zinc-900 text-white shadow-sm'
+                          ? 'bg-zinc-900 text-white shadow-xs'
                           : 'bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/70 hover:text-zinc-900'
                       }`}
                     >
@@ -274,18 +245,18 @@ export default function ContactsPage() {
               </div>
 
               <div className="text-[11px] text-zinc-400 font-mono hidden sm:block shrink-0">
-                Sort by header • Click arrows to upgrade/downgrade tier
+                Click column headers to sort • Dropdown to change level
               </div>
             </div>
 
-            {/* Data Table */}
-            <div className="overflow-x-auto border border-zinc-200/80 rounded-xl shadow-xs">
-              <table className="w-full min-w-[1020px] text-left border-collapse text-xs">
+            {/* Minimal, Full-Width Table */}
+            <div className="w-full overflow-x-auto border border-zinc-200/70 rounded-xl">
+              <table className="w-full text-left border-collapse text-xs min-w-[760px] sm:min-w-full">
                 <thead>
-                  <tr className="bg-zinc-50/70 border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider select-none">
-                    {/* Contact Name Sort */}
+                  <tr className="bg-[#fafafa] border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider select-none">
+                    {/* Contact Name */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('full_name')}
                     >
                       <div className="flex items-center gap-1.5">
@@ -300,14 +271,14 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    {/* Purchase Power Tier / Level Sort */}
+                    {/* VIP Level */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('vip_level')}
                     >
                       <div className="flex items-center gap-1.5">
                         <span className={sortField === 'vip_level' ? 'text-zinc-900 font-bold' : ''}>
-                          Purchase Tier
+                          Level
                         </span>
                         {sortField === 'vip_level' ? (
                           sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
@@ -317,9 +288,9 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    {/* Category Sort */}
+                    {/* Category */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('category')}
                     >
                       <div className="flex items-center gap-1.5">
@@ -334,14 +305,14 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    {/* Source Sort */}
+                    {/* Source */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('source')}
                     >
                       <div className="flex items-center gap-1.5">
                         <span className={sortField === 'source' ? 'text-zinc-900 font-bold' : ''}>
-                          Acquisition Source
+                          Source
                         </span>
                         {sortField === 'source' ? (
                           sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
@@ -351,17 +322,17 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    {/* Complete Address Column (Clamped 2 lines) */}
-                    <th className="py-3 px-4 min-w-[200px] max-w-[240px]">
+                    {/* Complete Address */}
+                    <th className="py-2.5 px-3 max-w-[200px]">
                       <div className="flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-zinc-400" />
-                        <span>Delivery Address</span>
+                        <span>Address</span>
                       </div>
                     </th>
 
-                    {/* City / Location Sort */}
+                    {/* City */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('city')}
                     >
                       <div className="flex items-center gap-1.5">
@@ -376,9 +347,9 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    {/* Email Sort */}
+                    {/* Email */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('email')}
                     >
                       <div className="flex items-center gap-1.5">
@@ -393,9 +364,9 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    {/* Phone Sort */}
+                    {/* Phone */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('phone')}
                     >
                       <div className="flex items-center gap-1.5">
@@ -410,9 +381,9 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    {/* Status Sort */}
+                    {/* Status */}
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-zinc-900 transition-colors group"
+                      className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
                       onClick={() => handleSort('status')}
                     >
                       <div className="flex items-center gap-1.5">
@@ -427,103 +398,76 @@ export default function ContactsPage() {
                       </div>
                     </th>
 
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    <th className="py-2.5 px-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 bg-white">
                   {filteredAndSortedContacts.map((c) => {
                     const colorStyle = getTierColorStyle(c.tier_color);
-                    const currentLevel = c.vip_level || 'Level 2';
-                    const isTopLevel = currentLevel === 'Level 1';
-                    const isBottomLevel = currentLevel === 'Level 4';
+                    const currentLevel = (c.vip_level as VIPLevel) || 'Level 2';
 
                     return (
                       <tr
                         key={c.id}
                         onClick={() => setSelectedContact(c)}
-                        className="hover:bg-zinc-50/80 transition-colors cursor-pointer group"
+                        className="hover:bg-zinc-50/70 transition-colors cursor-pointer group"
                       >
-                        {/* Contact Name */}
-                        <td className="py-3.5 px-4 font-semibold text-zinc-900 group-hover:text-blue-600 transition-colors">
+                        {/* Contact Name with Health Dot */}
+                        <td className="py-2.5 px-3 font-semibold text-zinc-900 group-hover:text-blue-600 transition-colors">
                           <div className="flex items-center gap-2">
                             <span
                               className={`w-2 h-2 rounded-full shrink-0 ${colorStyle.dot}`}
                               title={`Relationship Health: ${colorStyle.label}`}
                             />
-                            <span>{c.full_name}</span>
+                            <span className="truncate max-w-[150px]">{c.full_name}</span>
                           </div>
                         </td>
 
-                        {/* Purchase Tier & Quick Upgrade/Downgrade Controls */}
+                        {/* Level Dropdown (Clean, minimalist, no clutter or extra text) */}
                         <td
-                          className="py-3.5 px-4"
+                          className="py-2.5 px-3"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="flex items-center gap-1.5">
-                            {/* Level Selector Dropdown */}
-                            <select
-                              value={currentLevel}
-                              onChange={(e) =>
-                                handleQuickTierChange(c.id, e.target.value as VIPLevel)
-                              }
-                              className={`px-2 py-1 rounded-md text-[11px] font-semibold border transition-all cursor-pointer shadow-2xs ${
-                                currentLevel === 'Level 1'
-                                  ? 'bg-zinc-900 text-white border-zinc-900'
-                                  : currentLevel === 'Level 2'
-                                  ? 'bg-zinc-100 text-zinc-900 border-zinc-300'
-                                  : 'bg-white text-zinc-600 border-zinc-200'
-                              }`}
-                              title="Change Purchase Power Tier"
-                            >
-                              <option value="Level 1">Level 1 (Top VIP)</option>
-                              <option value="Level 2">Level 2 (High Buyer)</option>
-                              <option value="Level 3">Level 3 (Mid Tier)</option>
-                              <option value="Level 4">Level 4 (Standard)</option>
-                            </select>
-
-                            {/* Fast Upgrade / Downgrade Arrows */}
-                            <div className="flex flex-col gap-0.5">
-                              <button
-                                type="button"
-                                disabled={isTopLevel}
-                                onClick={() => handleQuickTierChange(c.id, 'upgrade')}
-                                className="p-0.5 rounded text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 disabled:opacity-20 transition-colors"
-                                title="Upgrade Tier"
-                              >
-                                <ChevronUp className="w-3 h-3" />
-                              </button>
-                              <button
-                                type="button"
-                                disabled={isBottomLevel}
-                                onClick={() => handleQuickTierChange(c.id, 'downgrade')}
-                                className="p-0.5 rounded text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 disabled:opacity-20 transition-colors"
-                                title="Downgrade Tier"
-                              >
-                                <ChevronDown className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
+                          <select
+                            value={currentLevel}
+                            onChange={(e) =>
+                              handleLevelChange(c.id, e.target.value as VIPLevel)
+                            }
+                            className={`px-2 py-0.5 rounded text-[11px] font-semibold border transition-all cursor-pointer ${
+                              currentLevel === 'Level 1'
+                                ? 'bg-zinc-900 text-white border-zinc-900'
+                                : currentLevel === 'Level 2'
+                                ? 'bg-zinc-100 text-zinc-800 border-zinc-200 hover:border-zinc-300'
+                                : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                            }`}
+                            title="Change VIP Level"
+                          >
+                            <option value="Level 1">Level 1</option>
+                            <option value="Level 2">Level 2</option>
+                            <option value="Level 3">Level 3</option>
+                            <option value="Level 4">Level 4</option>
+                          </select>
                         </td>
 
                         {/* Category */}
-                        <td className="py-3.5 px-4 text-zinc-600">
-                          <span className="px-2 py-0.5 rounded-full bg-zinc-100 border border-zinc-200 text-[11px] font-medium text-zinc-700">
+                        <td className="py-2.5 px-3 text-zinc-600">
+                          <span className="px-2 py-0.5 rounded-full bg-zinc-100/90 border border-zinc-200/80 text-[11px] font-medium text-zinc-700 whitespace-nowrap">
                             {c.category}
                           </span>
                         </td>
 
                         {/* Acquisition Source */}
-                        <td className="py-3.5 px-4 text-zinc-600">
+                        <td className="py-2.5 px-3 text-zinc-600">
                           <div className="flex items-center gap-1.5 text-[11px]">
-                            <Compass className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                            <span className="font-medium truncate max-w-[140px]" title={c.source || 'Direct'}>
+                            <Compass className="w-3 h-3 text-zinc-400 shrink-0" />
+                            <span className="font-medium truncate max-w-[130px]" title={c.source || 'Direct'}>
                               {c.source || 'Website Waitlist'}
                             </span>
                           </div>
                         </td>
 
-                        {/* Complete Delivery Address (Clamped to 2 lines with ...) */}
-                        <td className="py-3.5 px-4 min-w-[200px] max-w-[240px]">
+                        {/* Delivery Address (Clamped to 2 lines, no layout breakage) */}
+                        <td className="py-2.5 px-3 max-w-[180px] lg:max-w-[220px]">
                           {c.full_address ? (
                             <p
                               className="line-clamp-2 text-[11px] text-zinc-500 font-normal leading-tight group-hover:text-zinc-700 transition-colors"
@@ -537,22 +481,24 @@ export default function ContactsPage() {
                         </td>
 
                         {/* City */}
-                        <td className="py-3.5 px-4 text-zinc-600 font-medium">
+                        <td className="py-2.5 px-3 text-zinc-600 font-medium">
                           {c.city || '—'}
                         </td>
 
                         {/* Email */}
-                        <td className="py-3.5 px-4 text-zinc-500 font-mono text-[11px]">
-                          {c.email || '—'}
+                        <td className="py-2.5 px-3 text-zinc-500 font-mono text-[11px]">
+                          <span className="truncate max-w-[150px] inline-block" title={c.email || ''}>
+                            {c.email || '—'}
+                          </span>
                         </td>
 
                         {/* Phone */}
-                        <td className="py-3.5 px-4 text-zinc-500 font-mono text-[11px]">
+                        <td className="py-2.5 px-3 text-zinc-500 font-mono text-[11px] whitespace-nowrap">
                           {c.phone || '—'}
                         </td>
 
                         {/* Status */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-2.5 px-3 whitespace-nowrap">
                           <span className="inline-flex items-center gap-1.5 text-zinc-700 font-medium text-[11px]">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             <span>{c.status}</span>
@@ -561,20 +507,20 @@ export default function ContactsPage() {
 
                         {/* Actions */}
                         <td
-                          className="py-3.5 px-4 text-right"
+                          className="py-2.5 px-3 text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => setSelectedContact(c)}
-                              className="text-zinc-400 hover:text-zinc-900 p-1.5 rounded-md hover:bg-zinc-100 transition-colors"
+                              className="text-zinc-400 hover:text-zinc-900 p-1 rounded-md hover:bg-zinc-100 transition-colors"
                               title="Edit Contact"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDelete(c.id, c.full_name)}
-                              className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-md hover:bg-rose-50 transition-colors"
+                              className="text-zinc-400 hover:text-rose-600 p-1 rounded-md hover:bg-rose-50 transition-colors"
                               title="Delete Contact"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -652,7 +598,6 @@ function NewContactModal({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
-  const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -674,7 +619,6 @@ function NewContactModal({
           email,
           phone,
           city,
-          notes,
           status: 'Active',
         }),
       });
@@ -724,16 +668,16 @@ function NewContactModal({
           {/* Tier & Health Color */}
           <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">Purchase Power Tier</label>
+              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">VIP Level</label>
               <select
                 value={vipLevel}
                 onChange={(e) => setVipLevel(e.target.value as VIPLevel)}
                 className="w-full bg-white border border-zinc-200 rounded-lg px-2.5 py-2 font-medium"
               >
-                <option value="Level 1">Level 1 (Highest Purchase Power)</option>
-                <option value="Level 2">Level 2 (High / Repeat Buyer)</option>
-                <option value="Level 3">Level 3 (Mid / Engaged Waitlist)</option>
-                <option value="Level 4">Level 4 (Standard / Scouted)</option>
+                <option value="Level 1">Level 1</option>
+                <option value="Level 2">Level 2</option>
+                <option value="Level 3">Level 3</option>
+                <option value="Level 4">Level 4</option>
               </select>
             </div>
             <div>
@@ -743,10 +687,10 @@ function NewContactModal({
                 onChange={(e) => setTierColor(e.target.value as TierColor)}
                 className="w-full bg-white border border-zinc-200 rounded-lg px-2.5 py-2 font-medium"
               >
-                <option value="Green">🟢 Green (Hot / Strong Connection)</option>
-                <option value="Yellow">🟡 Yellow (Warm / High Potential)</option>
-                <option value="Damper">🟠 Damper (Amber / Follow-up)</option>
-                <option value="Red">🔴 Red (Cold / Inactive)</option>
+                <option value="Green">🟢 Green (Hot)</option>
+                <option value="Yellow">🟡 Yellow (Warm)</option>
+                <option value="Damper">🟠 Damper (Follow-up)</option>
+                <option value="Red">🔴 Red (Cold)</option>
               </select>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Platform } from '@/lib/types';
-import { Instagram, Youtube } from 'lucide-react';
+import { Instagram, Youtube, Facebook } from 'lucide-react';
 
 interface PlatformIconProps {
   platform?: Platform | string;
@@ -24,6 +24,10 @@ export default function PlatformIcon({ platform, className = 'w-3.5 h-3.5' }: Pl
 
   if (platform === 'YouTube') {
     return <Youtube className={`${className} text-red-600 shrink-0`} />;
+  }
+
+  if (platform === 'Facebook') {
+    return <Facebook className={`${className} text-blue-600 shrink-0`} />;
   }
 
   // Default to Instagram

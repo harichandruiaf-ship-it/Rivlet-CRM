@@ -112,15 +112,19 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ success: false, error: 'Athlete ID is required.' }, { status: 400 });
     }
 
-    const keys = Object.keys(updates);
-    if (keys.length === 0) {
+    // Exclude system keys that should not be directly assigned in SET
+    const validKeys = Object.keys(updates).filter(
+      (k) => !['id', 'created_at', 'updated_at'].includes(k)
+    );
+
+    if (validKeys.length === 0) {
       return NextResponse.json({ success: false, error: 'No fields to update.' }, { status: 400 });
     }
 
     const setClauses: string[] = [];
     const params: any[] = [id];
 
-    keys.forEach((key) => {
+    validKeys.forEach((key) => {
       params.push(updates[key]);
       setClauses.push(`${key} = $${params.length}`);
     });

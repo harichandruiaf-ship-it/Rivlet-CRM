@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AthleteCreator, AthleteNiche, FollowerTier, SeedingStage } from '@/lib/types';
+import { AthleteCreator, AthleteNiche, FollowerTier, SeedingStage, Platform } from '@/lib/types';
 import { X, Sparkles } from 'lucide-react';
 import { useDrops } from './DropContext';
+import PlatformIcon from './PlatformIcon';
 
 interface NewAthleteModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface NewAthleteModalProps {
 
 export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthleteModalProps) {
   const { drops, selectedDrop } = useDrops();
+  const [platform, setPlatform] = useState<Platform>('Instagram');
   const [handle, setHandle] = useState('');
   const [fullName, setFullName] = useState('');
   const [niche, setNiche] = useState<AthleteNiche>('Pilates');
@@ -31,7 +33,7 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!handle || !fullName) {
-      setError('Please provide handle and full name.');
+      setError('Please provide username/handle and full name.');
       return;
     }
 
@@ -39,11 +41,13 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
     setError(null);
 
     try {
+      const formattedHandle = handle.startsWith('@') ? handle : `@${handle}`;
       const res = await fetch('/api/athletes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          handle: handle.startsWith('@') ? handle : `@${handle}`,
+          platform,
+          handle: formattedHandle,
           full_name: fullName,
           niche,
           follower_tier: followerTier,
@@ -92,29 +96,52 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
             </div>
           )}
 
+          {/* Platform & Username / Handle Selection */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Instagram Handle *</label>
-              <input
-                type="text"
-                placeholder="@aanya.fit"
-                required
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
-                className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-900 font-mono"
-              />
+              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                Social Media Platform
+              </label>
+              <div className="relative">
+                <select
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value as Platform)}
+                  className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-900 font-medium"
+                >
+                  <option value="Instagram">Instagram</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="YouTube">YouTube</option>
+                  <option value="Facebook">Facebook</option>
+                </select>
+              </div>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Full Name *</label>
-              <input
-                type="text"
-                placeholder="Aanya Sharma"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              />
+              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                Username / Handle *
+              </label>
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  placeholder="@username"
+                  required
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value)}
+                  className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-900 font-mono"
+                />
+              </div>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-zinc-700 mb-1">Creator Full Name *</label>
+            <input
+              type="text"
+              placeholder="e.g. Aanya Sharma"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-900"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
