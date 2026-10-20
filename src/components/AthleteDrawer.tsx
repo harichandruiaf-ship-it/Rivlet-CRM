@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import { useDrops } from '@/components/DropContext';
 
 interface AthleteDrawerProps {
   athlete: AthleteCreator | null;
@@ -39,6 +40,7 @@ const COLORWAYS = [
 
 export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: AthleteDrawerProps) {
   const { showToast } = useToast();
+  const { drops } = useDrops();
   const [activeTab, setActiveTab] = useState<'sizing' | 'shipping' | 'roi'>('sizing');
   const [formData, setFormData] = useState<Partial<AthleteCreator>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -186,6 +188,27 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
 
         {/* Drawer Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
+          {/* Target Drop Selector */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[11px] font-semibold text-[#71717a] uppercase tracking-wider">
+                Assigned Collection / Drop
+              </label>
+              <span className="text-[10px] text-zinc-400 font-mono">Pipeline Scope</span>
+            </div>
+            <select
+              value={formData.target_drop || 'Drop 1'}
+              onChange={(e) => handleChange('target_drop', e.target.value)}
+              className="w-full bg-[#fbfbfb] hover:bg-white border border-[#e4e4e7] rounded-lg px-3 py-2 text-xs font-semibold text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 transition-colors"
+            >
+              {drops.map((d) => (
+                <option key={d.id} value={d.name}>
+                  {d.name} {d.status === 'active' ? '• Active Live' : `• ${d.status}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Pipeline Stage Quick Bar */}
           <div>
             <label className="block text-[11px] font-semibold text-[#71717a] uppercase tracking-wider mb-2">
@@ -231,7 +254,7 @@ export default function AthleteDrawer({ athlete, onClose, onSave, onDelete }: At
                     <Ruler className="w-4 h-4 text-amber-600" />
                     <span>Activewear Garment Sizing</span>
                   </div>
-                  <span className="text-[10px] text-zinc-500 font-mono">Rivlet Drop 1 Spec</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Rivlet {formData.target_drop || 'Drop 1'} Spec</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-1">

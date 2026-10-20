@@ -73,3 +73,27 @@ screenshots/
 /.diag*.mjs
 /.compare*.mjs
 /.narrow*.mjs
+
+# Admin scratch sync
+/.agent/
+/.agents/agents/
+/.agents/skills/codebase-mapper/
+/.agents/skills/context-compressor/
+/.agents/skills/context-fetch/
+/.agents/skills/context-health-monitor/
+/.agents/skills/debugger/
+/.agents/skills/empirical-validation/
+/.agents/skills/executor/
+/.agents/skills/plan-checker/
+/.agents/skills/planner/
+/.agents/skills/subagent-delegation/
+/.agents/skills/token-budget/
+/.agents/skills/verifier/
+/.gemini/
+/.gsd/
+GSD-STYLE.md
+PROJECT_RULES.md
+VERSION
+adapters/
+model_capabilities.yaml
+scripts/

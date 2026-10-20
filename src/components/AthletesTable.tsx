@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { AthleteCreator, SeedingStage } from '@/lib/types';
 import { Instagram, Package, ExternalLink, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import { useDrops } from './DropContext';
 
 interface AthletesTableProps {
   athletes: AthleteCreator[];
@@ -22,8 +23,13 @@ const STAGE_LABELS: Record<SeedingStage, { label: string; badge: string }> = {
 
 export default function AthletesTable({ athletes, onSelectAthlete, onUpdateStage }: AthletesTableProps) {
   const { showToast } = useToast();
+  const { selectedDrop } = useDrops();
   const [sortField, setSortField] = useState<'handle' | 'full_name' | 'niche' | 'stage'>('handle');
   const [sortAsc, setSortAsc] = useState(true);
+
+  const displayAthletes = selectedDrop === 'all'
+    ? athletes
+    : athletes.filter((a) => (a.target_drop || '').toLowerCase() === selectedDrop.toLowerCase());
 
   const handleSort = (field: 'handle' | 'full_name' | 'niche' | 'stage') => {
     if (sortField === field) {
@@ -34,7 +40,7 @@ export default function AthletesTable({ athletes, onSelectAthlete, onUpdateStage
     }
   };
 
-  const sortedAthletes = [...athletes].sort((a, b) => {
+  const sortedAthletes = [...displayAthletes].sort((a, b) => {
     const valA = (a[sortField] || '').toLowerCase();
     const valB = (b[sortField] || '').toLowerCase();
     return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);

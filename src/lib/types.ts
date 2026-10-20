@@ -1,5 +1,14 @@
 export type Platform = 'Instagram' | 'TikTok' | 'YouTube';
 
+export interface DropItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  status: 'active' | 'planning' | 'launched' | 'archived';
+  target_date?: string | null;
+  created_at: string;
+}
+
 export type AthleteNiche = 'Pilates' | 'Yoga' | 'Hyrox & Strength' | 'Marathon & Running' | 'CrossFit & Functional' | 'Mobility & Physio' | 'Athleisure';
 
 export type FollowerTier = 'Nano (<10k)' | 'Micro (10k-50k)' | 'Mid (50k-250k)' | 'Macro (250k+)';

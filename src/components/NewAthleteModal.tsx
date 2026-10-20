@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { AthleteCreator, AthleteNiche, FollowerTier, SeedingStage } from '@/lib/types';
 import { X, Sparkles } from 'lucide-react';
+import { useDrops } from './DropContext';
 
 interface NewAthleteModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface NewAthleteModalProps {
 }
 
 export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthleteModalProps) {
+  const { drops, selectedDrop } = useDrops();
   const [handle, setHandle] = useState('');
   const [fullName, setFullName] = useState('');
   const [niche, setNiche] = useState<AthleteNiche>('Pilates');
@@ -20,6 +22,7 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
   const [bottomSize, setBottomSize] = useState('S');
   const [inseamLength, setInseamLength] = useState('25"');
   const [stage, setStage] = useState<SeedingStage>('scouted');
+  const [targetDrop, setTargetDrop] = useState(selectedDrop === 'all' ? 'Drop 1' : selectedDrop);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +52,7 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
           bottom_size: bottomSize,
           inseam_length: inseamLength,
           stage,
-          target_drop: 'Drop 1',
+          target_drop: targetDrop,
         }),
       });
 
@@ -190,17 +193,38 @@ export default function NewAthleteModal({ isOpen, onClose, onCreated }: NewAthle
             </div>
           </div>
 
-          <div>
-            <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Initial Pipeline Stage</label>
-            <select
-              value={stage}
-              onChange={(e) => setStage(e.target.value as SeedingStage)}
-              className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-2.5 py-1.5"
-            >
-              <option value="scouted">Scouted</option>
-              <option value="contacted">Pitch Sent</option>
-              <option value="sizing_confirmed">Sizing Confirmed</option>
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Collection Drop</label>
+              <select
+                value={targetDrop}
+                onChange={(e) => setTargetDrop(e.target.value)}
+                className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-2.5 py-1.5 font-medium"
+              >
+                {drops.length > 0 ? (
+                  drops.map((d) => (
+                    <option key={d.id} value={d.name}>{d.name}</option>
+                  ))
+                ) : (
+                  <>
+                    <option value="Drop 1">Drop 1</option>
+                    <option value="Drop 2">Drop 2</option>
+                  </>
+                )}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-zinc-600 mb-1">Initial Pipeline Stage</label>
+              <select
+                value={stage}
+                onChange={(e) => setStage(e.target.value as SeedingStage)}
+                className="w-full bg-[#fbfbfb] border border-[#e4e4e7] rounded-md px-2.5 py-1.5"
+              >
+                <option value="scouted">Scouted</option>
+                <option value="contacted">Pitch Sent</option>
+                <option value="sizing_confirmed">Sizing Confirmed</option>
+              </select>
+            </div>
           </div>
 
           {/* Action buttons */}

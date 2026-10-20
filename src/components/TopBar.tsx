@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Search, Plus, LayoutGrid, Table, Command, X, Filter } from 'lucide-react';
+import { Search, Plus, LayoutGrid, Table, Command, X, Filter, Layers } from 'lucide-react';
+import { useDrops } from './DropContext';
 
 interface TopBarProps {
   title: string;
@@ -40,23 +41,36 @@ export default function TopBar({
   newButtonLabel = '+ New Record',
   onOpenCommandPalette,
 }: TopBarProps) {
+  const { selectedDrop, setIsNewDropModalOpen } = useDrops();
+  const dropLabel = selectedDrop === 'all' ? 'All Drops' : selectedDrop;
+
   return (
-    <header className="h-14 px-6 bg-white border-b border-[#e4e4e7] flex items-center justify-between shrink-0">
-      {/* Title & View Switcher */}
+    <header className="h-16 px-8 bg-white border-b border-zinc-200/80 flex items-center justify-between shrink-0">
+      {/* Title & Drop & View Switcher */}
       <div className="flex items-center gap-4">
         <div>
-          <h1 className="text-sm font-bold text-[#09090b] tracking-tight">{title}</h1>
-          {subtitle && <p className="text-[11px] text-[#71717a] font-medium">{subtitle}</p>}
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-semibold text-zinc-900 tracking-tight">{title}</h1>
+            <button
+              onClick={() => setIsNewDropModalOpen(true)}
+              className="text-[11px] font-medium text-zinc-500 bg-zinc-100 hover:bg-zinc-200 hover:text-zinc-900 px-2 py-0.5 rounded-full transition-colors flex items-center gap-1"
+              title="Click to create a new drop"
+            >
+              <Layers className="w-3 h-3 text-zinc-400" />
+              <span>{dropLabel}</span>
+            </button>
+          </div>
+          {subtitle && <p className="text-[11px] text-zinc-400 font-medium">{subtitle}</p>}
         </div>
 
         {onViewModeChange && (
-          <div className="flex items-center bg-[#f4f4f5] p-1 rounded-lg border border-[#e4e4e7] ml-2">
+          <div className="flex items-center bg-zinc-100/80 p-0.5 rounded-lg border border-zinc-200/60 ml-2">
             <button
               onClick={() => onViewModeChange('kanban')}
               className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all ${
                 viewMode === 'kanban'
-                  ? 'bg-white text-[#09090b] shadow-subtle'
-                  : 'text-[#71717a] hover:text-[#09090b]'
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -66,8 +80,8 @@ export default function TopBar({
               onClick={() => onViewModeChange('table')}
               className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all ${
                 viewMode === 'table'
-                  ? 'bg-white text-[#09090b] shadow-subtle'
-                  : 'text-[#71717a] hover:text-[#09090b]'
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               <Table className="w-3.5 h-3.5" />

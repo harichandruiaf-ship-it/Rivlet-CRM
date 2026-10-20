@@ -144,58 +144,51 @@ export default function WholesalePage() {
               return (
                 <div
                   key={col.key}
-                  className="w-72 shrink-0 flex flex-col rounded-xl bg-[#f4f4f5]/70 border border-[#e4e4e7]"
+                  className="w-72 shrink-0 flex flex-col rounded-2xl"
                 >
-                  {/* Column Header */}
-                  <div className="p-3 border-b border-[#e4e4e7] flex items-center justify-between bg-white/60 rounded-t-xl">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} />
-                      <span className="text-xs font-bold text-[#09090b]">{col.label}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[11px] font-mono font-bold text-zinc-900">
-                        ₹{colValue.toLocaleString('en-IN')}
-                      </div>
-                      <div className="text-[9px] text-zinc-500 font-medium">{colAccounts.length} accounts</div>
-                    </div>
+                  {/* Minimal Column Header */}
+                  <div className="pb-3 px-1 flex items-center justify-between border-b border-zinc-200/80 mb-3">
+                    <span className="text-xs font-semibold text-zinc-900 tracking-tight">
+                      {col.label}
+                    </span>
+                    <span className="text-[11px] font-mono font-medium text-zinc-500">
+                      ₹{colValue.toLocaleString('en-IN')}
+                    </span>
                   </div>
 
                   {/* Cards */}
-                  <div className="p-2 space-y-2.5 min-h-[480px] max-h-[calc(100vh-175px)] overflow-y-auto">
+                  <div className="space-y-3 min-h-[480px] max-h-[calc(100vh-170px)] overflow-y-auto pr-1">
                     {colAccounts.map((account) => (
                       <div
                         key={account.id}
                         onClick={() => setSelectedAccount(account)}
-                        className="p-3.5 rounded-lg bg-white border border-[#e4e4e7] shadow-card hover:border-zinc-400 hover:shadow-md cursor-pointer transition-all group select-none"
+                        className="p-4 rounded-xl bg-white border border-zinc-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-zinc-400/80 hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer transition-all select-none group"
                       >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-bold text-[#09090b] group-hover:text-blue-600 transition-colors truncate">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-zinc-900 group-hover:text-blue-600 transition-colors truncate">
                             {account.business_name}
                           </span>
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200 shrink-0">
+                          <span className="text-[11px] text-zinc-400">
                             {account.account_type.split(' ')[0]}
                           </span>
                         </div>
 
-                        <div className="text-[11px] text-[#71717a] flex items-center gap-1 mb-2.5">
-                          <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
-                          <span className="truncate">{account.location}</span>
+                        <div className="text-[11px] text-zinc-500 mb-3 truncate">
+                          {account.location} • Buyer: {account.contact_name}
                         </div>
 
-                        <div className="pt-2 border-t border-[#f4f4f5] flex items-center justify-between">
-                          <div className="text-[11px] text-zinc-600 truncate">
-                            Buyer: <strong className="font-semibold text-zinc-900">{account.contact_name}</strong>
-                          </div>
-                          <div className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
+                        <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
+                          <span className="text-[11px] text-zinc-400">Target Value</span>
+                          <span className="font-mono font-bold text-zinc-900">
                             ₹{Number(account.estimated_order_value).toLocaleString('en-IN')}
-                          </div>
+                          </span>
                         </div>
                       </div>
                     ))}
 
                     {colAccounts.length === 0 && (
-                      <div className="h-32 border border-dashed border-[#e4e4e7] rounded-lg flex items-center justify-center text-[11px] text-[#a1a1aa]">
-                        No studio accounts in stage
+                      <div className="h-32 border border-dashed border-zinc-200/80 rounded-xl flex items-center justify-center text-[11px] text-zinc-400">
+                        No studios in stage
                       </div>
                     )}
                   </div>
