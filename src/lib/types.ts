@@ -82,6 +82,7 @@ export interface WholesaleAccount {
 
 export type ContactCategory =
   | 'VIP Waitlist'
+  | 'Early Access'
   | 'Press/Media'
   | 'Fitness Coach'
   | 'Community Leader';

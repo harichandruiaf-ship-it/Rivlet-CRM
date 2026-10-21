@@ -96,4 +96,5 @@ PROJECT_RULES.md
 VERSION
 adapters/
 model_capabilities.yaml
-scripts/
+scripts/*
+!scripts/import-early-access.mjs

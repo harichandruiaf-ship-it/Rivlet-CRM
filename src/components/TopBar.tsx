@@ -16,6 +16,11 @@ interface TopBarProps {
   onNewClick: () => void;
   newButtonLabel?: string;
   onOpenCommandPalette?: () => void;
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+    icon?: React.ReactNode;
+  };
 }
 
 const NICHES = [
@@ -40,6 +45,7 @@ export default function TopBar({
   onNewClick,
   newButtonLabel = '+ New Record',
   onOpenCommandPalette,
+  secondaryAction,
 }: TopBarProps) {
   const { selectedDrop, setIsNewDropModalOpen, setIsMobileMenuOpen } = useDrops();
   const dropLabel = selectedDrop === 'all' ? 'All Drops' : selectedDrop;
@@ -148,6 +154,17 @@ export default function TopBar({
               ))}
             </select>
           </div>
+        )}
+
+        {/* Secondary Action Button (e.g. Import Early Access) */}
+        {secondaryAction && (
+          <button
+            onClick={secondaryAction.onClick}
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 text-xs font-semibold rounded-md shadow-xs transition-all active:scale-[0.98] shrink-0"
+          >
+            {secondaryAction.icon}
+            <span className="whitespace-nowrap">{secondaryAction.label}</span>
+          </button>
         )}
 
         {/* Primary Action Button */}

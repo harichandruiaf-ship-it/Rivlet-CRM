@@ -168,7 +168,7 @@ export default function EditContactModal({
                 onChange={(e) => handleChange('category', e.target.value as ContactCategory)}
                 className="w-full bg-[#fbfbfb] border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
               >
-                {['VIP Waitlist', 'Press/Media', 'Fitness Coach', 'Community Leader'].map((cat) => (
+                {['VIP Waitlist', 'Early Access', 'Press/Media', 'Fitness Coach', 'Community Leader'].map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>

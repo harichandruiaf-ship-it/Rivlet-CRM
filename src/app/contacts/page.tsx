@@ -1,65 +1,71 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import TopBar from '@/components/TopBar';
-import CommandPalette from '@/components/CommandPalette';
-import EditContactModal from '@/components/EditContactModal';
-import { CRMContact, ContactCategory, VIPLevel, TierColor } from '@/lib/types';
+import CommandPalette from "@/components/CommandPalette";
+import EditContactModal from "@/components/EditContactModal";
+import TopBar from "@/components/TopBar";
+import { useToast } from "@/components/ui/Toast";
+import { CRMContact, ContactCategory, TierColor, VIPLevel } from "@/lib/types";
 import {
-  Users,
-  Trash2,
-  Pencil,
-  ArrowUpDown,
-  ArrowUp,
   ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Compass,
   Filter,
   MapPin,
-  Compass,
-} from 'lucide-react';
-import { useToast } from '@/components/ui/Toast';
+  Pencil,
+  Trash2,
+  Users,
+  UploadCloud,
+} from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import ImportEarlyAccessModal from "@/components/ImportEarlyAccessModal";
 
 const CATEGORIES = [
-  'All',
-  'VIP Waitlist',
-  'Press/Media',
-  'Fitness Coach',
-  'Community Leader',
+  "All",
+  "VIP Waitlist",
+  "Early Access",
+  "Press/Media",
+  "Fitness Coach",
+  "Community Leader",
 ];
 
-const LEVEL_ORDER: VIPLevel[] = ['Level 1', 'Level 2', 'Level 3', 'Level 4'];
+const LEVEL_ORDER: VIPLevel[] = ["Level 1", "Level 2", "Level 3", "Level 4"];
 
 type SortField =
-  | 'full_name'
-  | 'vip_level'
-  | 'category'
-  | 'source'
-  | 'city'
-  | 'full_address'
-  | 'email'
-  | 'phone'
-  | 'status';
+  | "full_name"
+  | "vip_level"
+  | "category"
+  | "source"
+  | "city"
+  | "full_address"
+  | "email"
+  | "phone"
+  | "status";
 
 export default function ContactsPage() {
   const { showToast } = useToast();
   const [contacts, setContacts] = useState<CRMContact[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedContact, setSelectedContact] = useState<CRMContact | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [sortField, setSortField] = useState<SortField>('vip_level');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedContact, setSelectedContact] = useState<CRMContact | null>(
+    null,
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [sortField, setSortField] = useState<SortField>("vip_level");
   const [sortAsc, setSortAsc] = useState(true);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   const fetchContacts = async () => {
     try {
-      const res = await fetch('/api/contacts');
+      const res = await fetch("/api/contacts");
       const data = await res.json();
       if (data.success) {
         setContacts(data.data);
       }
     } catch (err) {
-      console.error('Failed to load contacts:', err);
+      console.error("Failed to load contacts:", err);
     } finally {
       setLoading(false);
     }
@@ -85,32 +91,35 @@ export default function ContactsPage() {
         c.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (c.city && c.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.source && c.source.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.full_address && c.full_address.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (c.source &&
+          c.source.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (c.full_address &&
+          c.full_address.toLowerCase().includes(searchTerm.toLowerCase())) ||
         c.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.vip_level && c.vip_level.toLowerCase().includes(searchTerm.toLowerCase()));
+        (c.vip_level &&
+          c.vip_level.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesCategory =
-        selectedCategory === 'All' || c.category === selectedCategory;
+        selectedCategory === "All" || c.category === selectedCategory;
 
       return matchesSearch && matchesCategory;
     });
 
     return [...list].sort((a, b) => {
-      if (sortField === 'vip_level') {
+      if (sortField === "vip_level") {
         const rank: Record<string, number> = {
-          'Level 1': 1,
-          'Level 2': 2,
-          'Level 3': 3,
-          'Level 4': 4,
+          "Level 1": 1,
+          "Level 2": 2,
+          "Level 3": 3,
+          "Level 4": 4,
         };
-        const rankA = rank[a.vip_level || 'Level 2'] || 99;
-        const rankB = rank[b.vip_level || 'Level 2'] || 99;
+        const rankA = rank[a.vip_level || "Level 2"] || 99;
+        const rankB = rank[b.vip_level || "Level 2"] || 99;
         return sortAsc ? rankA - rankB : rankB - rankA;
       }
 
-      const valA = (a[sortField] || '').toString().toLowerCase();
-      const valB = (b[sortField] || '').toString().toLowerCase();
+      const valA = (a[sortField] || "").toString().toLowerCase();
+      const valB = (b[sortField] || "").toString().toLowerCase();
       return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
     });
   }, [contacts, searchTerm, selectedCategory, sortField, sortAsc]);
@@ -118,8 +127,8 @@ export default function ContactsPage() {
   const handleDelete = async (id: string, name: string) => {
     if (confirm(`Delete ${name}?`)) {
       setContacts((prev) => prev.filter((c) => c.id !== id));
-      await fetch(`/api/contacts?id=${id}`, { method: 'DELETE' });
-      showToast(`Deleted ${name}`, 'info');
+      await fetch(`/api/contacts?id=${id}`, { method: "DELETE" });
+      showToast(`Deleted ${name}`, "info");
     }
   };
 
@@ -134,55 +143,57 @@ export default function ContactsPage() {
 
     // Optimistic UI update
     setContacts((prev) =>
-      prev.map((c) => (c.id === contactId ? { ...c, vip_level: nextLevel } : c))
+      prev.map((c) =>
+        c.id === contactId ? { ...c, vip_level: nextLevel } : c,
+      ),
     );
 
     try {
-      const res = await fetch('/api/contacts', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/contacts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: contactId, vip_level: nextLevel }),
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`${target.full_name} updated to ${nextLevel}`, 'success');
+        showToast(`${target.full_name} updated to ${nextLevel}`, "success");
       } else {
         fetchContacts();
-        showToast('Failed to update level', 'error');
+        showToast("Failed to update level", "error");
       }
     } catch {
       fetchContacts();
-      showToast('Network error while updating level', 'error');
+      showToast("Network error while updating level", "error");
     }
   };
 
   // Helper for Health / Connection Color
   const getTierColorStyle = (color?: TierColor | string | null) => {
     switch (color) {
-      case 'Green':
+      case "Green":
         return {
-          dot: 'bg-emerald-500 ring-2 ring-emerald-200',
-          label: 'Green (Hot)',
+          dot: "bg-emerald-500 ring-2 ring-emerald-200",
+          label: "Green (Hot)",
         };
-      case 'Yellow':
+      case "Yellow":
         return {
-          dot: 'bg-amber-400 ring-2 ring-amber-200',
-          label: 'Yellow (Warm)',
+          dot: "bg-amber-400 ring-2 ring-amber-200",
+          label: "Yellow (Warm)",
         };
-      case 'Damper':
+      case "Damper":
         return {
-          dot: 'bg-orange-500 ring-2 ring-orange-200',
-          label: 'Damper (Follow-up)',
+          dot: "bg-orange-500 ring-2 ring-orange-200",
+          label: "Damper (Follow-up)",
         };
-      case 'Red':
+      case "Red":
         return {
-          dot: 'bg-rose-500 ring-2 ring-rose-200',
-          label: 'Red (Cold)',
+          dot: "bg-rose-500 ring-2 ring-rose-200",
+          label: "Red (Cold)",
         };
       default:
         return {
-          dot: 'bg-emerald-500 ring-2 ring-emerald-200',
-          label: 'Green',
+          dot: "bg-emerald-500 ring-2 ring-emerald-200",
+          label: "Green",
         };
     }
   };
@@ -196,6 +207,11 @@ export default function ContactsPage() {
         onSearchChange={setSearchTerm}
         onNewClick={() => setIsNewModalOpen(true)}
         newButtonLabel="+ Add Contact"
+        secondaryAction={{
+          label: 'Import Early Access',
+          icon: <UploadCloud className="w-3.5 h-3.5 text-zinc-600" />,
+          onClick: () => setIsImportModalOpen(true),
+        }}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
@@ -217,7 +233,7 @@ export default function ContactsPage() {
                 {CATEGORIES.map((cat) => {
                   const isSelected = selectedCategory === cat;
                   const count =
-                    cat === 'All'
+                    cat === "All"
                       ? contacts.length
                       : contacts.filter((c) => c.category === cat).length;
 
@@ -227,14 +243,14 @@ export default function ContactsPage() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-zinc-900 text-white shadow-xs'
-                          : 'bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/70 hover:text-zinc-900'
+                          ? "bg-zinc-900 text-white shadow-xs"
+                          : "bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/70 hover:text-zinc-900"
                       }`}
                     >
                       <span>{cat}</span>
                       <span
                         className={`text-[10px] font-mono ${
-                          isSelected ? 'text-zinc-300' : 'text-zinc-400'
+                          isSelected ? "text-zinc-300" : "text-zinc-400"
                         }`}
                       >
                         {count}
@@ -242,10 +258,6 @@ export default function ContactsPage() {
                     </button>
                   );
                 })}
-              </div>
-
-              <div className="text-[11px] text-zinc-400 font-mono hidden sm:block shrink-0">
-                Click column headers to sort • Dropdown to change level
               </div>
             </div>
 
@@ -257,14 +269,24 @@ export default function ContactsPage() {
                     {/* Contact Name */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('full_name')}
+                      onClick={() => handleSort("full_name")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'full_name' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "full_name"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           Contact
                         </span>
-                        {sortField === 'full_name' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "full_name" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -274,14 +296,24 @@ export default function ContactsPage() {
                     {/* VIP Level */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('vip_level')}
+                      onClick={() => handleSort("vip_level")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'vip_level' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "vip_level"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           Level
                         </span>
-                        {sortField === 'vip_level' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "vip_level" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -291,14 +323,24 @@ export default function ContactsPage() {
                     {/* Category */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('category')}
+                      onClick={() => handleSort("category")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'category' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "category"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           Category
                         </span>
-                        {sortField === 'category' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "category" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -308,14 +350,24 @@ export default function ContactsPage() {
                     {/* Source */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('source')}
+                      onClick={() => handleSort("source")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'source' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "source"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           Source
                         </span>
-                        {sortField === 'source' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "source" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -333,14 +385,24 @@ export default function ContactsPage() {
                     {/* City */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('city')}
+                      onClick={() => handleSort("city")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'city' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "city"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           City
                         </span>
-                        {sortField === 'city' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "city" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -350,14 +412,24 @@ export default function ContactsPage() {
                     {/* Email */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('email')}
+                      onClick={() => handleSort("email")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'email' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "email"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           Email
                         </span>
-                        {sortField === 'email' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "email" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -367,14 +439,24 @@ export default function ContactsPage() {
                     {/* Phone */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('phone')}
+                      onClick={() => handleSort("phone")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'phone' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "phone"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           Phone
                         </span>
-                        {sortField === 'phone' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "phone" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -384,14 +466,24 @@ export default function ContactsPage() {
                     {/* Status */}
                     <th
                       className="py-2.5 px-3 cursor-pointer hover:text-zinc-900 transition-colors group"
-                      onClick={() => handleSort('status')}
+                      onClick={() => handleSort("status")}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className={sortField === 'status' ? 'text-zinc-900 font-bold' : ''}>
+                        <span
+                          className={
+                            sortField === "status"
+                              ? "text-zinc-900 font-bold"
+                              : ""
+                          }
+                        >
                           Status
                         </span>
-                        {sortField === 'status' ? (
-                          sortAsc ? <ArrowUp className="w-3 h-3 text-zinc-900" /> : <ArrowDown className="w-3 h-3 text-zinc-900" />
+                        {sortField === "status" ? (
+                          sortAsc ? (
+                            <ArrowUp className="w-3 h-3 text-zinc-900" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-zinc-900" />
+                          )
                         ) : (
                           <ArrowUpDown className="w-3 h-3 text-zinc-400 opacity-60 group-hover:opacity-100" />
                         )}
@@ -404,7 +496,7 @@ export default function ContactsPage() {
                 <tbody className="divide-y divide-zinc-100 bg-white">
                   {filteredAndSortedContacts.map((c) => {
                     const colorStyle = getTierColorStyle(c.tier_color);
-                    const currentLevel = (c.vip_level as VIPLevel) || 'Level 2';
+                    const currentLevel = (c.vip_level as VIPLevel) || "Level 2";
 
                     return (
                       <tr
@@ -419,7 +511,9 @@ export default function ContactsPage() {
                               className={`w-2 h-2 rounded-full shrink-0 ${colorStyle.dot}`}
                               title={`Relationship Health: ${colorStyle.label}`}
                             />
-                            <span className="truncate max-w-[150px]">{c.full_name}</span>
+                            <span className="truncate max-w-[150px]">
+                              {c.full_name}
+                            </span>
                           </div>
                         </td>
 
@@ -431,14 +525,17 @@ export default function ContactsPage() {
                           <select
                             value={currentLevel}
                             onChange={(e) =>
-                              handleLevelChange(c.id, e.target.value as VIPLevel)
+                              handleLevelChange(
+                                c.id,
+                                e.target.value as VIPLevel,
+                              )
                             }
                             className={`px-2 py-0.5 rounded text-[11px] font-semibold border transition-all cursor-pointer ${
-                              currentLevel === 'Level 1'
-                                ? 'bg-zinc-900 text-white border-zinc-900'
-                                : currentLevel === 'Level 2'
-                                ? 'bg-zinc-100 text-zinc-800 border-zinc-200 hover:border-zinc-300'
-                                : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                              currentLevel === "Level 1"
+                                ? "bg-zinc-900 text-white border-zinc-900"
+                                : currentLevel === "Level 2"
+                                  ? "bg-zinc-100 text-zinc-800 border-zinc-200 hover:border-zinc-300"
+                                  : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300"
                             }`}
                             title="Change VIP Level"
                           >
@@ -460,8 +557,11 @@ export default function ContactsPage() {
                         <td className="py-2.5 px-3 text-zinc-600">
                           <div className="flex items-center gap-1.5 text-[11px]">
                             <Compass className="w-3 h-3 text-zinc-400 shrink-0" />
-                            <span className="font-medium truncate max-w-[130px]" title={c.source || 'Direct'}>
-                              {c.source || 'Website Waitlist'}
+                            <span
+                              className="font-medium truncate max-w-[130px]"
+                              title={c.source || "Direct"}
+                            >
+                              {c.source || "Website Waitlist"}
                             </span>
                           </div>
                         </td>
@@ -476,25 +576,30 @@ export default function ContactsPage() {
                               {c.full_address}
                             </p>
                           ) : (
-                            <span className="text-[11px] text-zinc-300 italic">—</span>
+                            <span className="text-[11px] text-zinc-300 italic">
+                              —
+                            </span>
                           )}
                         </td>
 
                         {/* City */}
                         <td className="py-2.5 px-3 text-zinc-600 font-medium">
-                          {c.city || '—'}
+                          {c.city || "—"}
                         </td>
 
                         {/* Email */}
                         <td className="py-2.5 px-3 text-zinc-500 font-mono text-[11px]">
-                          <span className="truncate max-w-[150px] inline-block" title={c.email || ''}>
-                            {c.email || '—'}
+                          <span
+                            className="truncate max-w-[150px] inline-block"
+                            title={c.email || ""}
+                          >
+                            {c.email || "—"}
                           </span>
                         </td>
 
                         {/* Phone */}
                         <td className="py-2.5 px-3 text-zinc-500 font-mono text-[11px] whitespace-nowrap">
-                          {c.phone || '—'}
+                          {c.phone || "—"}
                         </td>
 
                         {/* Status */}
@@ -571,6 +676,16 @@ export default function ContactsPage() {
         />
       )}
 
+      {/* Import Early Access Modal */}
+      <ImportEarlyAccessModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={(count) => {
+          fetchContacts();
+          showToast(`Successfully imported ${count} early access contacts`);
+        }}
+      />
+
       {/* Command Palette */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
@@ -589,15 +704,15 @@ function NewContactModal({
   onClose: () => void;
   onCreated: (c: CRMContact) => void;
 }) {
-  const [fullName, setFullName] = useState('');
-  const [category, setCategory] = useState<ContactCategory>('VIP Waitlist');
-  const [vipLevel, setVipLevel] = useState<VIPLevel>('Level 2');
-  const [tierColor, setTierColor] = useState<TierColor>('Green');
-  const [source, setSource] = useState('Website Waitlist');
-  const [fullAddress, setFullAddress] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [city, setCity] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [category, setCategory] = useState<ContactCategory>("VIP Waitlist");
+  const [vipLevel, setVipLevel] = useState<VIPLevel>("Level 2");
+  const [tierColor, setTierColor] = useState<TierColor>("Green");
+  const [source, setSource] = useState("Website Waitlist");
+  const [fullAddress, setFullAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -606,9 +721,9 @@ function NewContactModal({
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/contacts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           full_name: fullName,
           category,
@@ -619,7 +734,7 @@ function NewContactModal({
           email,
           phone,
           city,
-          status: 'Active',
+          status: "Active",
         }),
       });
       const data = await res.json();
@@ -641,20 +756,31 @@ function NewContactModal({
               <Users className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-900">Add VIP / Media Contact</h2>
-              <p className="text-[11px] text-zinc-500">Waitlist members, buyers, and activewear press</p>
+              <h2 className="text-sm font-semibold text-zinc-900">
+                Add VIP / Media Contact
+              </h2>
+              <p className="text-[11px] text-zinc-500">
+                Waitlist members, buyers, and activewear press
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700 p-1">
-            <span className="sr-only">Close</span>
-            ✕
+          <button
+            onClick={onClose}
+            className="text-zinc-400 hover:text-zinc-700 p-1"
+          >
+            <span className="sr-only">Close</span>✕
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1"
+        >
           {/* Full Name */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1">Full Name *</label>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1">
+              Full Name *
+            </label>
             <input
               type="text"
               required
@@ -668,7 +794,9 @@ function NewContactModal({
           {/* Tier & Health Color */}
           <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">VIP Level</label>
+              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                VIP Level
+              </label>
               <select
                 value={vipLevel}
                 onChange={(e) => setVipLevel(e.target.value as VIPLevel)}
@@ -681,7 +809,9 @@ function NewContactModal({
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">Connection Health</label>
+              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                Connection Health
+              </label>
               <select
                 value={tierColor}
                 onChange={(e) => setTierColor(e.target.value as TierColor)}
@@ -698,19 +828,31 @@ function NewContactModal({
           {/* Category & Source */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">Category</label>
+              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                Category
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ContactCategory)}
                 className="w-full bg-[#fbfbfb] border border-zinc-200 rounded-lg px-2.5 py-2"
               >
-                {['VIP Waitlist', 'Press/Media', 'Fitness Coach', 'Community Leader'].map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {[
+                  "VIP Waitlist",
+                  "Early Access",
+                  "Press/Media",
+                  "Fitness Coach",
+                  "Community Leader",
+                ].map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">Acquisition Source</label>
+              <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                Acquisition Source
+              </label>
               <input
                 type="text"
                 placeholder="e.g. Instagram Inbound"
@@ -738,7 +880,9 @@ function NewContactModal({
           {/* Email, Phone, City */}
           <div className="grid grid-cols-3 gap-2.5">
             <div>
-              <label className="block text-[11px] font-medium text-zinc-700 mb-1">City</label>
+              <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                City
+              </label>
               <input
                 type="text"
                 placeholder="Mumbai..."
@@ -748,7 +892,9 @@ function NewContactModal({
               />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-zinc-700 mb-1">Email</label>
+              <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                Email
+              </label>
               <input
                 type="email"
                 placeholder="name@..."
@@ -758,7 +904,9 @@ function NewContactModal({
               />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-zinc-700 mb-1">Phone</label>
+              <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                Phone
+              </label>
               <input
                 type="text"
                 placeholder="+91..."
@@ -782,7 +930,7 @@ function NewContactModal({
               disabled={isSubmitting}
               className="px-5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold rounded-lg shadow-sm disabled:opacity-50"
             >
-              {isSubmitting ? 'Adding...' : 'Add Contact'}
+              {isSubmitting ? "Adding..." : "Add Contact"}
             </button>
           </div>
         </form>
